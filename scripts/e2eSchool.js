@@ -478,6 +478,14 @@ async function cleanup() {
   console.log(`  invoices removed: ${created.invoiceIds.length}`);
 
   await prisma.studentAdvance.deleteMany({ where: { studentId: { in: created.studentIds } } });
+
+  // Student-scoped children that block student.deleteMany. The ledger, refunds
+  // and adjustments each hold a studentId FK, and an adjustment also points at
+  // an assessment — so it has to go before the assessments below, not merely
+  // before the students.
+  await prisma.studentLedger.deleteMany({ where: { studentId: { in: created.studentIds } } });
+  await prisma.refund.deleteMany({ where: { studentId: { in: created.studentIds } } });
+  await prisma.billingAdjustment.deleteMany({ where: { studentId: { in: created.studentIds } } });
   await prisma.assessmentLine.deleteMany({ where: { assessmentId: { in: created.assessmentIds } } });
   await prisma.assessment.deleteMany({ where: { id: { in: created.assessmentIds } } });
   await prisma.studentDiscount.deleteMany({ where: { enrollmentId: { in: created.enrollmentIds } } });
