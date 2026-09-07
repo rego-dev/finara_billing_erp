@@ -313,6 +313,22 @@ exports.saveFeeStructure = async (req, res, next) => {
       throw createError('One or more fee types do not belong to this business', 400);
     }
 
+    // The year and the level must be this business's own too. Unchecked, a
+    // stale id from a dropdown the browser loaded before the row was deleted
+    // reaches MySQL as a raw foreign-key error the registrar cannot act on,
+    // and a live id from another business would quietly attach this structure
+    // to their school year.
+    const [schoolYear, gradeLevel] = await Promise.all([
+      prisma.schoolYear.findFirst({ where: { id: Number(schoolYearId), businessId: req.businessId } }),
+      prisma.gradeLevel.findFirst({ where: { id: Number(gradeLevelId), businessId: req.businessId } }),
+    ]);
+    if (!schoolYear) {
+      throw createError('That school year is not available — reload the page and pick it again', 400);
+    }
+    if (!gradeLevel) {
+      throw createError('That grade level is not available — reload the page and pick it again', 400);
+    }
+
     const existing = await prisma.feeStructure.findFirst({
       where: { businessId: req.businessId, schoolYearId: Number(schoolYearId), gradeLevelId: Number(gradeLevelId) },
     });

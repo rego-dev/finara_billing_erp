@@ -798,6 +798,11 @@ function FeeStructures() {
   };
 
   const save = async () => {
+    // Without a year picked, Number('') is 0 and the save posts a school year
+    // id that cannot exist — which reached the registrar as a raw foreign-key
+    // error. Nothing auto-selects when no year is marked current, so this is
+    // reachable on a school whose years are all still flagged not-current.
+    if (!schoolYearId) return toast.error('Pick a school year first');
     try {
       await sApi.feeStructures.save({
         schoolYearId: Number(schoolYearId),
