@@ -7,6 +7,7 @@ import {
   Package, Landmark, Wallet,
   ShoppingCart, Banknote, BarChart3, Repeat,
   PanelLeftClose, PanelLeftOpen, HandCoins, Scale,
+  GraduationCap,
 } from 'lucide-react';
 import PesoReceipt from '@/components/icons/PesoReceipt';
 import { clearSession, getUser } from '@/lib/auth';
@@ -45,6 +46,25 @@ const NAV = [
         ],
       },
       { label: 'Cash Sales', icon: Banknote, href: '/receivable/cash-sales' },
+    ],
+  },
+  {
+    section: 'School',
+    items: [
+      {
+        label: 'School Billing', icon: GraduationCap,
+        children: [
+          { label: 'Cashier',      href: '/school/collections' },
+          { label: 'Students',     href: '/school/students' },
+          { label: 'Enrollment',   href: '/school/enrollment' },
+          { label: 'Assessments',  href: '/school/assessments' },
+          { label: 'Billing Run',  href: '/school/billing' },
+          { label: 'Revenue Recognition', href: '/school/amortization' },
+          { label: 'Subsidies',    href: '/school/subsidies' },
+          { label: 'Reports',      href: '/school/reports' },
+          { label: 'Setup',        href: '/school/setup' },
+        ],
+      },
     ],
   },
   {
