@@ -1,0 +1,18 @@
+POST {LEAD_WEBHOOK_URL}
+Content-Type: application/json
+X-Webhook-Signature: sha256=<hex-hmac-of-raw-body>
+
+{
+  "event": "lead.created",
+  "data": {
+    "id": 123,
+    "name": "Juan Dela Cruz",
+    "company": "ABC Corp",
+    "email": "juan@abc.com",
+    "phone": "09171234567",
+    "message": "Interested in payroll module",
+    "source": "contact",
+    "status": "NEW",
+    "createdAt": "2026-07-13T10:00:00.000Z"
+  }
+}

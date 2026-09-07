@@ -1,0 +1,16 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Finara Icon</title>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="120" height="120" rx="24" fill="url(#g)"/>
+  <rect x="22" y="78" width="20" height="26" rx="4" fill="white"/>
+  <rect x="50" y="58" width="20" height="46" rx="4" fill="white"/>
+  <rect x="78" y="32" width="20" height="72" rx="4" fill="white"/>
+  <polyline points="32,78 60,58 88,32" fill="none" stroke="white" stroke-width="1.5" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="88" cy="32" r="6" fill="#60a5fa"/>
+  <circle cx="88" cy="32" r="3" fill="white"/>
+</svg>

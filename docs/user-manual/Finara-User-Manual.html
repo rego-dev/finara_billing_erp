@@ -1,0 +1,2711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finara — Complete User Manual</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#F5F6FA; --surface:#FFFFFF; --surface-2:#EEF1F7; --border:#DBE0EA;
+  --text:#161B27; --text-2:#5B6472;
+  --brand:#1E3A8A; --brand-2:#2F5FD1; --gold:#B8860B;
+  --ok:#1F8A5F; --warn:#9A6412; --warn-bg:#FBF3E3; --warn-border:#EAD3A0;
+  --tip-bg:#EAF0FD; --tip-border:#C7D7F7;
+  --fd-accent-fill: rgba(30,58,138,0.08);
+  --shadow: 0 1px 2px rgba(20,30,60,0.06), 0 8px 24px rgba(20,30,60,0.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E1420; --surface:#141B2B; --surface-2:#1B2438; --border:#2A3448;
+    --text:#E7EAF2; --text-2:#98A2B5;
+    --brand:#8FB0FA; --brand-2:#6E9BF2; --gold:#E0AA4E;
+    --ok:#4FCB93; --warn:#E7B65C; --warn-bg:#2A2214; --warn-border:#4A3B1C;
+    --tip-bg:#16233D; --tip-border:#2A3E63;
+    --fd-accent-fill: rgba(143,176,250,0.14);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1420; --surface:#141B2B; --surface-2:#1B2438; --border:#2A3448;
+  --text:#E7EAF2; --text-2:#98A2B5;
+  --brand:#8FB0FA; --brand-2:#6E9BF2; --gold:#E0AA4E;
+  --ok:#4FCB93; --warn:#E7B65C; --warn-bg:#2A2214; --warn-border:#4A3B1C;
+  --tip-bg:#16233D; --tip-border:#2A3E63;
+  --fd-accent-fill: rgba(143,176,250,0.14);
+}
+:root[data-theme="light"]{
+  --bg:#F5F6FA; --surface:#FFFFFF; --surface-2:#EEF1F7; --border:#DBE0EA;
+  --text:#161B27; --text-2:#5B6472;
+  --brand:#1E3A8A; --brand-2:#2F5FD1; --gold:#B8860B;
+  --ok:#1F8A5F; --warn:#9A6412; --warn-bg:#FBF3E3; --warn-border:#EAD3A0;
+  --tip-bg:#EAF0FD; --tip-border:#C7D7F7;
+  --fd-accent-fill: rgba(30,58,138,0.08);
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  font-size:16px; line-height:1.6;
+}
+.sans{ font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+h1,h2,h3,h4{ font-family:"Segoe UI", "Helvetica Neue", Arial, sans-serif; font-weight:700; color:var(--text); text-wrap:balance; letter-spacing:-0.01em; }
+a{ color:var(--brand-2); }
+.wrap{ max-width:900px; margin:0 auto; padding:0 24px; }
+.prose{ max-width:66ch; }
+
+/* Cover */
+.cover{
+  min-height: 100vh; display:flex; flex-direction:column; justify-content:center;
+  background: linear-gradient(160deg, var(--brand) 0%, var(--brand-2) 100%);
+  color:#F5F7FF; padding: 64px 24px; position:relative;
+}
+.cover .wrap{ max-width:760px; }
+.cover .eyebrow{ font-family:"Segoe UI",sans-serif; text-transform:uppercase; letter-spacing:0.14em; font-size:12.5px; color:#CFE0FF; margin:0 0 18px; }
+.cover h1{ color:#fff; font-size:clamp(36px,6vw,58px); line-height:1.05; margin:0 0 18px; }
+.cover .sub{ font-family:Georgia,serif; font-size:19px; color:#DCE6FF; max-width:52ch; margin:0 0 40px; }
+.cover .badges{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:56px; }
+.cover .badge{ font-family:"Segoe UI",sans-serif; font-size:12px; font-weight:600; letter-spacing:0.02em; padding:6px 12px; border-radius:99px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.28); color:#EEF3FF; }
+.cover .meta{ font-family:"Segoe UI",sans-serif; font-size:13px; color:#B9CBF5; border-top:1px solid rgba(255,255,255,0.22); padding-top:20px; display:flex; gap:28px; flex-wrap:wrap; }
+.cover .meta b{ color:#fff; display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; font-weight:600; margin-bottom:3px; }
+
+/* TOC */
+.toc{ padding: 72px 0 40px; border-bottom:1px solid var(--border); }
+.toc h2{ font-size:28px; margin:0 0 8px; }
+.toc .toc-note{ font-family:"Segoe UI",sans-serif; color:var(--text-2); font-size:14px; margin:0 0 32px; }
+.toc-list{ list-style:none; margin:0; padding:0; display:grid; gap:22px; }
+.toc-chapter > a{ font-family:"Segoe UI",sans-serif; font-weight:700; font-size:17px; text-decoration:none; color:var(--text); display:flex; align-items:baseline; gap:10px; }
+.toc-chapter > a:hover{ color:var(--brand-2); }
+.toc-num{ font-family:"Segoe UI",sans-serif; color:var(--gold); font-weight:700; font-size:13px; min-width:22px; }
+.toc-sections{ list-style:none; margin:8px 0 0 32px; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:4px 24px; }
+.toc-sections a{ font-family:"Segoe UI",sans-serif; font-size:14px; text-decoration:none; color:var(--text-2); }
+.toc-sections a:hover{ color:var(--brand-2); }
+
+/* Chapters */
+.chapter{ padding: 56px 0 8px; border-bottom:1px solid var(--border); }
+.chapter-head{ display:flex; gap:20px; align-items:flex-start; margin-bottom:36px; }
+.chapter-num{ font-family:"Segoe UI",sans-serif; font-weight:800; font-size:40px; color:var(--gold); line-height:1; flex-shrink:0; opacity:0.85; }
+.chapter-head h2{ font-size:30px; margin:0 0 8px; }
+.chapter-intro{ font-family:Georgia,serif; color:var(--text-2); font-size:16px; margin:0; max-width:64ch; }
+
+.module{ padding: 30px 0; border-top:1px solid var(--border); }
+.module:first-of-type{ border-top:none; }
+.module-kicker{ font-family:"Segoe UI",sans-serif; font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--brand-2); margin:0 0 6px; }
+.module h3{ font-size:21px; margin:0 0 10px; }
+.module .lead{ font-family:Georgia,serif; max-width:66ch; color:var(--text); margin:0 0 18px; }
+.module h4{ font-family:"Segoe UI",sans-serif; font-size:13px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-2); margin:22px 0 10px; }
+
+.fields-table{ width:100%; border-collapse:collapse; font-family:"Segoe UI",sans-serif; font-size:14px; margin:0 0 6px; }
+.fields-table td{ padding:9px 12px; border-top:1px solid var(--border); vertical-align:top; }
+.fields-table tr:first-child td{ border-top:none; }
+.fields-table .ft-field{ font-weight:600; color:var(--text); white-space:nowrap; width:1%; padding-right:20px; }
+.fields-table td:not(.ft-field){ color:var(--text-2); }
+
+.steps{ margin:0 0 20px; padding-left:22px; display:grid; gap:8px; }
+.steps li{ padding-left:4px; }
+.steps strong{ color:var(--text); }
+
+.flow-figure{ margin: 24px 0; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:18px 16px 14px; }
+.flow-svg{ display:block; width:100%; height:auto; max-width:720px; margin:0 auto; color:var(--text); }
+figcaption{ font-family:"Segoe UI",sans-serif; font-size:12px; color:var(--text-2); text-align:center; margin-top:10px; }
+
+.callout{ border-radius:10px; padding:14px 16px; margin:16px 0; font-family:"Segoe UI",sans-serif; font-size:14px; border:1px solid; }
+.callout-label{ margin:0 0 6px; font-weight:700; font-size:11.5px; text-transform:uppercase; letter-spacing:0.05em; }
+.callout ul{ margin:0; padding-left:18px; display:grid; gap:5px; }
+.callout-tip{ background:var(--tip-bg); border-color:var(--tip-border); }
+.callout-tip .callout-label{ color:var(--brand-2); }
+.callout-warn{ background:var(--warn-bg); border-color:var(--warn-border); }
+.callout-warn .callout-label{ color:var(--warn); }
+
+footer.doc-footer{ padding:48px 0 80px; text-align:center; font-family:"Segoe UI",sans-serif; font-size:13px; color:var(--text-2); }
+
+/* Print */
+@media print{
+  body{ background:#fff; font-size:11.5pt; }
+  .cover{ min-height:auto; height:100vh; page-break-after:always; }
+  .toc{ page-break-after:always; }
+  .chapter{ page-break-before:always; border-top:none; }
+  .chapter:first-of-type{ page-break-before:auto; }
+  .module{ break-inside:avoid-page; }
+  .flow-figure{ break-inside:avoid-page; }
+  a{ color:var(--text); text-decoration:none; }
+  .wrap{ max-width:100%; }
+}
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="wrap">
+    <p class="eyebrow">User Manual</p>
+    <h1>Finara</h1>
+    <p class="sub">A complete, module-by-module guide to running your books in Finara — the Philippine-compliant accounting ERP for BIR, SSS, PhilHealth, and Pag-IBIG compliance.</p>
+    <div class="badges">
+      <span class="badge">BIR Compliant</span>
+      <span class="badge">TRAIN Law 2023</span>
+      <span class="badge">SSS &middot; PhilHealth &middot; Pag-IBIG</span>
+      <span class="badge">PFRS for SMEs</span>
+    </div>
+    <div class="meta">
+      <div><b>Prepared</b>August 10, 2026</div>
+      <div><b>Chapters</b>9 modules, 44 features</div>
+      <div><b>Format</b>Reference manual &mdash; read a chapter, or the whole thing</div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <section class="toc" id="toc">
+    <h2>Table of Contents</h2>
+    <p class="toc-note">Every entry below is a live link — click a chapter or feature to jump straight to it. Diagrams throughout are simplified workflow charts, not literal screenshots.</p>
+    <ol class="toc-list">
+    <li class="toc-chapter">
+      <a href="#chapter-1"><span class="toc-num">01</span>Getting Started</a>
+      <ul class="toc-sections"><li><a href="#signing-in">Signing In</a></li><li><a href="#reading-the-dashboard">Reading the Dashboard</a></li><li><a href="#switching-businesses">Switching Businesses</a></li></ul>
+    </li>
+    <li class="toc-chapter">
+      <a href="#chapter-2"><span class="toc-num">02</span>Accounting</a>
+      <ul class="toc-sections"><li><a href="#chart-of-accounts">Chart of Accounts</a></li><li><a href="#general-ledger-journal-entries">General Ledger (Journal Entries)</a></li><li><a href="#recurring-entries">Recurring Entries</a></li></ul>
+    </li>
+    <li class="toc-chapter">
+      <a href="#chapter-3"><span class="toc-num">03</span>Sales — Accounts Receivable</a>
+      <ul class="toc-sections"><li><a href="#invoices">Invoices</a></li><li><a href="#quotations">Quotations</a></li><li><a href="#customers">Customers</a></li><li><a href="#ar-aging">AR Aging</a></li></ul>
+    </li>
+    <li class="toc-chapter">
+      <a href="#chapter-4"><span class="toc-num">04</span>Purchases — Accounts Payable</a>
+      <ul class="toc-sections"><li><a href="#bills">Bills</a></li><li><a href="#vendors">Vendors</a></li><li><a href="#ap-aging">AP Aging</a></li><li><a href="#purchase-orders">Purchase Orders</a></li><li><a href="#expense-vouchers">Expense Vouchers</a></li><li><a href="#cash-requests">Cash Requests</a></li></ul>
+    </li>
+    <li class="toc-chapter">
+      <a href="#chapter-5"><span class="toc-num">05</span>Payroll</a>
+      <ul class="toc-sections"><li><a href="#employees">Employees</a></li><li><a href="#pay-periods">Pay Periods</a></li><li><a href="#payroll-calculator">Payroll Calculator</a></li></ul>
+    </li>
+    <li class="toc-chapter">
+      <a href="#chapter-6"><span class="toc-num">06</span>Inventory &amp; Fixed Assets</a>
+      <ul class="toc-sections"><li><a href="#stock-on-hand">Stock on Hand</a></li><li><a href="#items">Items</a></li><li><a href="#transactions">Transactions</a></li><li><a href="#inventory-reports">Inventory Reports</a></li><li><a href="#fixed-assets">Fixed Assets</a></li></ul>
+    </li>
+    <li class="toc-chapter">
+      <a href="#chapter-7"><span class="toc-num">07</span>Banking &amp; Compliance</a>
+      <ul class="toc-sections"><li><a href="#bank-reconciliation">Bank Reconciliation</a></li><li><a href="#vat-summary-form-2550m-2550q">VAT Summary (Form 2550M / 2550Q)</a></li><li><a href="#withholding-tax-form-1601-c">Withholding Tax (Form 1601-C)</a></li><li><a href="#ewt-summary-form-1601-eq">EWT Summary (Form 1601-EQ)</a></li><li><a href="#alphalist-form-1604-c-annex">Alphalist (Form 1604-C Annex)</a></li><li><a href="#relief-export-sls-slp">RELIEF Export (SLS/SLP)</a></li><li><a href="#remittances">Remittances</a></li></ul>
+    </li>
+    <li class="toc-chapter">
+      <a href="#chapter-8"><span class="toc-num">08</span>Planning &amp; Reports</a>
+      <ul class="toc-sections"><li><a href="#budgeting">Budgeting</a></li><li><a href="#trial-balance">Trial Balance</a></li><li><a href="#income-statement">Income Statement</a></li><li><a href="#balance-sheet">Balance Sheet</a></li><li><a href="#cash-position">Cash Position</a></li><li><a href="#custom-reports">Custom Reports</a></li></ul>
+    </li>
+    <li class="toc-chapter">
+      <a href="#chapter-9"><span class="toc-num">09</span>Settings &amp; Administration</a>
+      <ul class="toc-sections"><li><a href="#company-fiscal-tax-payroll-and-numbering">Company, Fiscal &amp; Tax, Payroll, and Numbering</a></li><li><a href="#users-roles">Users &amp; Roles</a></li><li><a href="#businesses-multi-company">Businesses (Multi-Company)</a></li><li><a href="#opening-balances">Opening Balances</a></li><li><a href="#database-backup-restore-reset">Database — Backup, Restore &amp; Reset</a></li><li><a href="#system-permissions-inquiries">System, Permissions &amp; Inquiries</a></li><li><a href="#audit-trail">Audit Trail</a></li></ul>
+    </li></ol>
+  </section>
+
+  
+  <section class="chapter" id="chapter-1">
+    <div class="chapter-head">
+      <div class="chapter-num">01</div>
+      <div>
+        <h2>Getting Started</h2>
+        <p class="chapter-intro">How to sign in, read the dashboard, and move between businesses before touching any accounting module.</p>
+      </div>
+    </div>
+    
+  <section class="module" id="signing-in">
+    <div class="module-kicker">1.1 &middot; Login screen</div>
+    <h3>Signing In</h3>
+    <p class="lead">Authenticates you into Finara with a company email and password. Sessions are secured with JWT access/refresh tokens (bcrypt-hashed passwords), and every login attempt — successful, failed, or blocked — is written to the Audit Trail.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Email Address</td><td>The address your administrator registered for you.</td></tr><tr><td class="ft-field">Password</td><td>Use the eye icon to reveal/hide it while typing.</td></tr><tr><td class="ft-field">Forgot password?</td><td>Sends a reset link (valid 1 hour) without ever confirming whether an email exists in the system.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Open Finara and enter your Email Address and Password.</li><li>Click <strong>Sign In</strong>.</li><li>On success you land on the Dashboard with a "Welcome back" toast; on failure you'll see a generic "Invalid credentials" message.</li><li>If you mistype your password 5 times in a row, the account locks for 15 minutes — wait it out or use "Forgot password?"</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Signing In workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-mqzx1tx" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-mqzx1tx)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-mqzx1tx)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-mqzx1tx)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Enter credentials</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Sign In</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Session created</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Dashboard</text>
+      
+    </g>
+    </svg>
+    <figcaption>Signing In workflow</figcaption>
+  </figure>
+    <div class="callout callout-tip"><p class="callout-label">Tips</p><ul><li>Bookmark the login page — Finara redirects you straight back to it whenever your session (default 8 hours) expires.</li></ul></div>
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>5 failed attempts locks the account for 15 minutes, even if the 6th attempt would have been correct.</li></ul></div>
+  </section>
+
+  <section class="module" id="reading-the-dashboard">
+    <div class="module-kicker">1.2 &middot; Sidebar → Dashboard</div>
+    <h3>Reading the Dashboard</h3>
+    <p class="lead">A read-only landing page that summarizes the health of the currently active business the moment you log in — no filters, nothing to configure.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Stat cards</td><td>Open Receivables, Open Payables, This Month Revenue, and Net Income (MTD), each with a supporting count.</td></tr><tr><td class="ft-field">MTD chart</td><td>A bar chart of Revenue vs. Expenses vs. Net Income for the current month.</td></tr><tr><td class="ft-field">Alerts panel</td><td>Surfaces only what needs attention: Overdue Receivables, Overdue Payables, and Draft Journal Entries awaiting review. Shows "All clear!" when there's nothing to flag.</td></tr><tr><td class="ft-field">Quick counts</td><td>Active Customers, Active Vendors, Active Employees.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Log in — the Dashboard is the default landing page.</li><li>Scan the four stat cards for a same-day snapshot.</li><li>Check the Alerts panel first — it is the fastest way to see what is overdue or waiting on you.</li><li>Use the counts and alerts as jumping-off points into the relevant module (e.g. click through to Accounts Payable if bills are overdue).</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Reading the Dashboard workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-pvhn40k" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-pvhn40k)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-pvhn40k)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-pvhn40k)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Log in</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Dashboard loads</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Scan alerts</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Jump to module</text>
+      
+    </g>
+    </svg>
+    <figcaption>Reading the Dashboard workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+
+  <section class="module" id="switching-businesses">
+    <div class="module-kicker">1.3 &middot; Header → Business switcher</div>
+    <h3>Switching Businesses</h3>
+    <p class="lead">Finara is multi-business: one login can have access to several companies (e.g. separate legal entities), each with its own books, Chart of Accounts, and documents. The switcher in the header changes which business's data every other screen shows.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Single-business users</td><td>See a static label with the business name — there's nothing to switch.</td></tr><tr><td class="ft-field">Multi-business users</td><td>See a dropdown listing every business you have access to, with a checkmark on the active one.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click the business name in the header.</li><li>Pick a different business from the dropdown.</li><li>Every module — Dashboard, Accounts, Journal, Reports — immediately reflects the newly selected business's data.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 520 102" role="img" aria-label="Switching Businesses workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-47ctun3" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-47ctun3)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-47ctun3)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Click switcher</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick business</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Context switches app-wide</text>
+      
+    </g>
+    </svg>
+    <figcaption>Switching Businesses workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>You only see businesses an admin has explicitly granted you access to via Settings → Businesses — ADMIN users see all businesses automatically.</li></ul></div>
+  </section>
+  </section>
+
+  <section class="chapter" id="chapter-2">
+    <div class="chapter-head">
+      <div class="chapter-num">02</div>
+      <div>
+        <h2>Accounting</h2>
+        <p class="chapter-intro">The backbone of the system: the Chart of Accounts every other module posts to, the General Ledger where those postings live, and templates that automate repeating entries.</p>
+      </div>
+    </div>
+    
+  <section class="module" id="chart-of-accounts">
+    <div class="module-kicker">2.1 &middot; Sidebar → Accounting → Chart of Accounts</div>
+    <h3>Chart of Accounts</h3>
+    <p class="lead">Maintains the PFRS-aligned master list of GL accounts (Assets, Liabilities, Equity, Revenue, Expense) that every invoice, bill, payslip, and journal entry ultimately posts against.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Account Code</td><td>Optional — leave blank and Finara auto-numbers it (steps of 10, e.g. 1010, 1020) inside the standard PH ranges: 1xxx Assets, 2xxx Liabilities, 3xxx Equity, 4xxx Revenue, 5xxx&ndash;6xxx Expenses. Locked once the account exists.</td></tr><tr><td class="ft-field">Account Type</td><td>ASSET, LIABILITY, EQUITY, REVENUE, or EXPENSE — cannot be changed after creation.</td></tr><tr><td class="ft-field">Normal Balance</td><td>DEBIT or CREDIT — auto-set from the type, but overridable.</td></tr><tr><td class="ft-field">Parent / Header Account</td><td>Only root (non-child) accounts can be parents, giving one level of grouping in the tree view.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Account</strong>.</li><li>Choose the Account Type (Normal Balance auto-fills).</li><li>Enter an Account Name; optionally set a custom code, a parent account, and a description.</li><li>Click <strong>Create Account</strong>.</li><li>To retire an account, edit it and mark it inactive rather than deleting — deletion is blocked once it has any transactions.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Chart of Accounts workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-6jz0fiz" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-6jz0fiz)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-6jz0fiz)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-6jz0fiz)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Account</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick type</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Name + code</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Create</text>
+      
+    </g>
+    </svg>
+    <figcaption>Chart of Accounts workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>An account with existing journal lines cannot be deleted — Finara returns "Cannot delete account with existing transactions."</li><li>Only ADMIN/MANAGER can create or edit accounts; only ADMIN can delete one.</li></ul></div>
+  </section>
+
+  <section class="module" id="general-ledger-journal-entries">
+    <div class="module-kicker">2.2 &middot; Sidebar → Accounting → General Ledger</div>
+    <h3>General Ledger (Journal Entries)</h3>
+    <p class="lead">Where every double-entry transaction in the business is recorded, reviewed as a DRAFT, posted to become part of the official ledger, or — if truly necessary — voided under a second layer of authorization.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Date / Reference / Description</td><td>Header details for the entry; Reference is typically an OR or document number.</td></tr><tr><td class="ft-field">Journal lines</td><td>Minimum two lines, each with an Account, a Debit or Credit amount, and an optional memo.</td></tr><tr><td class="ft-field">Balance indicator</td><td>Live "&check; Balanced" / "&cross; Off by X.XX" readout — Save is disabled until debits equal credits.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Entry</strong> and set the Date and Description.</li><li>Add lines with <strong>+ Add Line</strong>, picking an account and a debit or credit amount for each.</li><li>Confirm the totals row reads "&check; Balanced."</li><li>Click <strong>Save Entry</strong> — it is created as DRAFT.</li><li>From the list, click the check-circle <strong>Post</strong> icon to commit it to POSTED — only posted entries reach the Trial Balance, Income Statement, and Balance Sheet.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 876 102" role="img" aria-label="General Ledger (Journal Entries) workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-it9tbxg" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-it9tbxg)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-it9tbxg)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-it9tbxg)"/>
+      <line x1="686" y1="51" x2="719" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-it9tbxg)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Entry</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Add lines</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Balanced?</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save (DRAFT)</text>
+      
+    </g>
+    <g>
+      <rect x="728" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="794" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Post (POSTED)</text>
+      
+    </g>
+    </svg>
+    <figcaption>General Ledger (Journal Entries) workflow</figcaption>
+  </figure>
+    <div class="callout callout-tip"><p class="callout-label">Tips</p><ul><li>Reports (Trial Balance, Income Statement, Balance Sheet) only ever include POSTED entries — a DRAFT entry is invisible to them until it's posted.</li></ul></div>
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Voiding is permanent and requires a mandatory reason plus an ADMIN password on a second confirmation screen — a voided entry can never be re-posted.</li><li>Only DRAFT entries can be edited; POSTED or VOIDED entries are locked.</li></ul></div>
+  </section>
+
+  <section class="module" id="recurring-entries">
+    <div class="module-kicker">2.3 &middot; Sidebar → Accounting → Recurring Entries</div>
+    <h3>Recurring Entries</h3>
+    <p class="lead">Journal-entry templates (e.g. monthly rent, amortization) that generate real, balanced journal entries on a schedule instead of you re-typing them every period.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Frequency</td><td>WEEKLY, MONTHLY, QUARTERLY, or ANNUALLY.</td></tr><tr><td class="ft-field">Start / End Date</td><td>Start Date becomes the first "next run" date; End Date (optional) auto-deactivates the template once passed.</td></tr><tr><td class="ft-field">Template lines</td><td>Same shape as a Journal Entry — must balance before the template can be saved.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Template</strong>, name it, and choose a Frequency and Start Date.</li><li>Build the balanced line template (accounts + debit/credit amounts).</li><li>Click <strong>Create</strong> — the template goes live with "next run" set to the Start Date.</li><li>Click <strong>Run All Due</strong> to fire every template whose run date has passed, or <strong>Run Now</strong> on one row to post it immediately.</li><li>Each run posts a normal journal entry and advances the template's next-run date automatically.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 876 102" role="img" aria-label="Recurring Entries workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-x4ptogj" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-x4ptogj)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-x4ptogj)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-x4ptogj)"/>
+      <line x1="686" y1="51" x2="719" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-x4ptogj)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Template</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Build balanced lines</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Run Now / Run All Due</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Journal entry posted</text>
+      
+    </g>
+    <g>
+      <rect x="728" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="794" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Next run date advances</text>
+      
+    </g>
+    </svg>
+    <figcaption>Recurring Entries workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>A run dated earlier than the business's configured "books start date" is skipped rather than posted, with an explanatory message instead of a fabricated entry.</li></ul></div>
+  </section>
+  </section>
+
+  <section class="chapter" id="chapter-3">
+    <div class="chapter-head">
+      <div class="chapter-num">03</div>
+      <div>
+        <h2>Sales — Accounts Receivable</h2>
+        <p class="chapter-intro">Everything involved in billing customers: quoting, invoicing, collecting payment, and tracking who still owes you money.</p>
+      </div>
+    </div>
+    
+  <section class="module" id="invoices">
+    <div class="module-kicker">3.1 &middot; Sidebar → Sales → Accounts Receivable → Invoices</div>
+    <h3>Invoices</h3>
+    <p class="lead">Creates and tracks sales invoices billed to customers — the core of the AR ledger — and records collections against them as payments come in.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Customer / Invoice Date / Due Date</td><td>Due Date defaults to Invoice Date + 30 days if left blank.</td></tr><tr><td class="ft-field">Line items</td><td>Revenue Account, Description, Quantity, Unit Price, and a VAT code per line: VAT (12%), ZERO-rated, or EXEMPT.</td></tr><tr><td class="ft-field">Totals panel</td><td>Subtotal, Output VAT (12%), and Total Invoice Amount recompute live as you edit lines.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Invoice</strong> and select (or add) a customer.</li><li>Set the Invoice Date; adjust the auto-filled Due Date if needed.</li><li>Add line items, choosing a Revenue Account and VAT code per line.</li><li>Review the computed totals, then click <strong>Create Invoice</strong>.</li><li>When payment arrives, open the invoice and click <strong>Record Collection</strong>: enter the amount (or use the 25/50/75/100% shortcuts), payment method, and reference number.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Invoices workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-zfl1vij" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-zfl1vij)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-zfl1vij)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-zfl1vij)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Create Invoice</text>
+      <text x="82" y="63" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.65">OPEN</text>
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Record Collection</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">PARTIAL</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Fully paid</text>
+      <text x="616" y="63" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.65">PAID</text>
+    </g>
+    </svg>
+    <figcaption>Invoices workflow</figcaption>
+  </figure>
+    <div class="callout callout-tip"><p class="callout-label">Tips</p><ul><li>GCash, Maya, PESONet, InstaPay, Bank Transfer, Check, and Cash are all supported collection methods, each mapped to the correct cash/bank GL account automatically.</li></ul></div>
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Voiding is only allowed while paidAmount is exactly zero — once any collection is recorded, you must reverse the collection first.</li></ul></div>
+  </section>
+
+  <section class="module" id="quotations">
+    <div class="module-kicker">3.2 &middot; Sidebar → Sales → Accounts Receivable → Quotations</div>
+    <h3>Quotations</h3>
+    <p class="lead">Drafts price quotes for customers before committing to a GL-posting invoice — nothing on a quotation touches the ledger until it is converted.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Customer / Quotation Date / Valid Until</td><td>Valid Until defaults to +30 days.</td></tr><tr><td class="ft-field">Lines</td><td>Item (typing a stocked item name auto-fills its price), Description, Qty, Unit Price, VAT code — no GL account yet.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Quotation</strong>, pick a customer, and add line items.</li><li>Save as DRAFT, edit as needed, then click <strong>Mark Sent</strong> once delivered to the customer.</li><li>Record the customer response with <strong>Accept</strong> or <strong>Reject</strong>.</li><li>When ready to bill, click <strong>Convert to Invoice</strong>: assign a revenue account to every line (required — the button stays disabled otherwise), confirm the Due Date, and submit.</li><li>A real, GL-posted AR Invoice is created and the quotation is marked CONVERTED and linked to it.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 876 102" role="img" aria-label="Quotations workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-msrk2pv" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-msrk2pv)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-msrk2pv)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-msrk2pv)"/>
+      <line x1="686" y1="51" x2="719" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-msrk2pv)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">DRAFT</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Mark Sent</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Accept</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Convert to Invoice</text>
+      
+    </g>
+    <g>
+      <rect x="728" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="794" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">CONVERTED</text>
+      
+    </g>
+    </svg>
+    <figcaption>Quotations workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Only DRAFT quotations can be edited, and a CONVERTED quotation can never be deleted or re-converted.</li></ul></div>
+  </section>
+
+  <section class="module" id="customers">
+    <div class="module-kicker">3.3 &middot; Sidebar → Sales → Accounts Receivable → Customers</div>
+    <h3>Customers</h3>
+    <p class="lead">Maintains the AR customer master list and gives a one-click view of each customer's billing and collection standing.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Customer Code</td><td>Auto-generated as CUS-001, CUS-002... if left blank; locked after creation.</td></tr><tr><td class="ft-field">Name (required), TIN, Address, Contact Person, Phone, Email</td><td>Everything else is optional.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Customer</strong> and enter at least the name.</li><li>Save — the customer is now selectable when creating Invoices or Quotations.</li><li>Click any customer card to open a detail drawer with Total Billed, Outstanding balance, Collection Rate, and recent invoices.</li><li>Toggle Active/Inactive from edit mode — inactive customers no longer appear in the invoice-creation picker.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Customers workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-7i8731e" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-7i8731e)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-7i8731e)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-7i8731e)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Customer</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Selectable on Invoices</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Review standing anytime</text>
+      
+    </g>
+    </svg>
+    <figcaption>Customers workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+
+  <section class="module" id="ar-aging">
+    <div class="module-kicker">3.4 &middot; Sidebar → Sales → Accounts Receivable → AR Aging</div>
+    <h3>AR Aging</h3>
+    <p class="lead">A read-only report bucketing everything customers owe by how overdue it is — the fastest way to spot collection risk.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Buckets</td><td>Current, 1&ndash;30 days, 31&ndash;60 days, 61&ndash;90 days, Over 90 days.</td></tr><tr><td class="ft-field">Included documents</td><td>Only OPEN/PARTIAL/OVERDUE invoices — fully paid and voided invoices are excluded.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Open AR Aging — the report builds automatically as of today.</li><li>Review the KPI cards: Total Receivable, Not Yet Due, Total Overdue, and a color-coded Collection Risk percentage.</li><li>Switch between Bar and Pie chart views of the bucket totals.</li><li>Expand a customer row in the detail table to see exactly which invoices are driving their balance.</li><li>Click <strong>Refresh</strong> to recompute against the current date.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="AR Aging workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-99b267a" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-99b267a)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-99b267a)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-99b267a)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Open report</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Review risk %</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Expand customer</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Act (collect / escalate)</text>
+      
+    </g>
+    </svg>
+    <figcaption>AR Aging workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Any balance in the Over 90 days bucket triggers a banner suggesting collection-agency engagement or bad-debt write-off.</li></ul></div>
+  </section>
+  </section>
+
+  <section class="chapter" id="chapter-4">
+    <div class="chapter-head">
+      <div class="chapter-num">04</div>
+      <div>
+        <h2>Purchases — Accounts Payable</h2>
+        <p class="chapter-intro">Recording what the business owes vendors, paying it, and the surrounding purchase-order, petty-cash, and cash-advance workflows.</p>
+      </div>
+    </div>
+    
+  <section class="module" id="bills">
+    <div class="module-kicker">4.1 &middot; Sidebar → Purchases → Accounts Payable → Bills</div>
+    <h3>Bills</h3>
+    <p class="lead">Records vendor purchase invoices and tracks payments against them — the AP counterpart to Sales Invoices.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Vendor / Bill Date / Due Date</td><td>Due Date defaults to Bill Date + 30 days.</td></tr><tr><td class="ft-field">Line items</td><td>Expense/Asset Account, Description, VAT code (VAT/ZERO/EXEMPT), Qty, Unit Price.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Bill</strong>, select (or add) a vendor, and set the dates.</li><li>Add line items with the correct expense/asset account and VAT code.</li><li>Review the computed totals, then save — the bill posts to the GL automatically (expense debited, Input VAT debited if applicable, Accounts Payable credited).</li><li>When you pay it, open the bill and click <strong>Record Payment</strong>: enter amount, method, and reference.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Bills workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-njnh039" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-njnh039)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-njnh039)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-njnh039)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Create Bill</text>
+      <text x="82" y="63" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.65">OPEN</text>
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Record Payment</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">PARTIAL</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Fully paid</text>
+      <text x="616" y="63" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.65">PAID</text>
+    </g>
+    </svg>
+    <figcaption>Bills workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Voiding a bill is only allowed while nothing has been paid against it yet — reverse payments first.</li></ul></div>
+  </section>
+
+  <section class="module" id="vendors">
+    <div class="module-kicker">4.2 &middot; Sidebar → Purchases → Accounts Payable → Vendors</div>
+    <h3>Vendors</h3>
+    <p class="lead">Maintains the AP vendor master list used across Bills and Purchase Orders, with a quick view of each vendor's billing history.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Vendor Code</td><td>Auto-generated as VEN-001, VEN-002... at creation; editable only then.</td></tr><tr><td class="ft-field">Name (required), TIN, Address, Contact Person, Phone, Email</td><td>Everything else is optional.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Vendor</strong> and enter at least the name.</li><li>Save — the vendor is now selectable on Bills and Purchase Orders.</li><li>Click a vendor card to review Total Billed, Outstanding balance, and recent bills.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Vendors workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-jnwo1xv" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-jnwo1xv)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-jnwo1xv)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-jnwo1xv)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Vendor</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Selectable on Bills/POs</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Review standing anytime</text>
+      
+    </g>
+    </svg>
+    <figcaption>Vendors workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Inactive vendors disappear from the Bill/PO creation picker but their history stays intact — there is no vendor-delete option in Finara.</li></ul></div>
+  </section>
+
+  <section class="module" id="ap-aging">
+    <div class="module-kicker">4.3 &middot; Sidebar → Purchases → Accounts Payable → AP Aging</div>
+    <h3>AP Aging</h3>
+    <p class="lead">A read-only report bucketing everything owed to vendors by how overdue it is.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Buckets</td><td>Current, 1&ndash;30 days, 31&ndash;60 days, 61&ndash;90 days, Over 90 days.</td></tr><tr><td class="ft-field">Included documents</td><td>Only OPEN/PARTIAL/OVERDUE bills — Void and Paid bills are excluded.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Open AP Aging — the report builds automatically as of today.</li><li>Review the KPI cards and the bucket-summary bar chart.</li><li>Expand a vendor row to see which specific bills are aging.</li><li>Click <strong>Refresh</strong> to recompute against today.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="AP Aging workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-5by8l5j" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-5by8l5j)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-5by8l5j)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-5by8l5j)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Open report</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Scan buckets</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Expand vendor</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Prioritize payment</text>
+      
+    </g>
+    </svg>
+    <figcaption>AP Aging workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Any balance over 90 days overdue triggers a banner recommending vendor negotiation or escalation.</li></ul></div>
+  </section>
+
+  <section class="module" id="purchase-orders">
+    <div class="module-kicker">4.4 &middot; Sidebar → Purchases → Purchase Orders</div>
+    <h3>Purchase Orders</h3>
+    <p class="lead">Manages the full purchasing lifecycle — from a draft order, through receiving goods, to either a formal AP Bill or a direct petty-cash payment.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Vendor / Order Date / Expected Delivery</td><td>Header details.</td></tr><tr><td class="ft-field">Lines</td><td>Description, Qty, Unit Price, and — required before billing — an Expense Account per line.</td></tr><tr><td class="ft-field">Scan &amp; Import</td><td>Uploads a photo of a paper PO; OCR pre-fills vendor, dates, and line items for review before import.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New PO</strong> (or use <strong>Scan &amp; Import</strong> for a paper form) and fill in vendor and lines.</li><li>Click <strong>Mark as Sent</strong> once the PO goes to the vendor.</li><li>As deliveries arrive, use <strong>Receive Goods</strong> to log quantities received (status moves to PARTIAL or RECEIVED).</li><li>Either click <strong>Convert to Bill</strong> (creates a normal AP Bill and GL entry — every line needs an expense account first), or <strong>Pay from Petty Cash</strong> for small purchases (creates an Expense Voucher and posts directly, bypassing AP).</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 876 102" role="img" aria-label="Purchase Orders workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-r3nrmx0" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-r3nrmx0)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-r3nrmx0)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-r3nrmx0)"/>
+      <line x1="686" y1="51" x2="719" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-r3nrmx0)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">DRAFT</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Sent</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Receive Goods</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Convert to Bill / Petty Cash</text>
+      
+    </g>
+    <g>
+      <rect x="728" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="794" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">BILLED</text>
+      
+    </g>
+    </svg>
+    <figcaption>Purchase Orders workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>A cancelled or already-billed PO cannot be converted or cancelled again; receiving cannot exceed the ordered quantity.</li></ul></div>
+  </section>
+
+  <section class="module" id="expense-vouchers">
+    <div class="module-kicker">4.5 &middot; Sidebar → Purchases → Expense Vouchers</div>
+    <h3>Expense Vouchers</h3>
+    <p class="lead">Records non-AP cash disbursements — petty cash, employee reimbursements, direct payments (utilities, rent), and cash-advance liquidations — for payees who may not even be a registered vendor.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Voucher Type</td><td>Petty Cash, Reimbursement, Direct Payment, or Liquidation.</td></tr><tr><td class="ft-field">Payee</td><td>Free text — not limited to the vendor master, useful for gas stations, freelancers, or government agencies.</td></tr><tr><td class="ft-field">Lines</td><td>Description, optional COA Account, Amount, Receipt #.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Voucher</strong>, choose a type, and enter payee, purpose, and line items.</li><li>Click <strong>Submit</strong> to send it for approval.</li><li><strong>Approve</strong> or <strong>Reject</strong> (rejection requires a reason).</li><li>Once approved, click <strong>Mark Paid</strong> and choose the funding account (Petty Cash 1011 by default) — this posts the GL entry.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Expense Vouchers workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-e8srvfv" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-e8srvfv)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-e8srvfv)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-e8srvfv)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">DRAFT</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Submit</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Approve</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Mark Paid</text>
+      
+    </g>
+    </svg>
+    <figcaption>Expense Vouchers workflow</figcaption>
+  </figure>
+    <div class="callout callout-tip"><p class="callout-label">Tips</p><ul><li>Every voucher can be printed with signature blocks for Requested / Approved / Received By, and can carry receipt attachments.</li></ul></div>
+    
+  </section>
+
+  <section class="module" id="cash-requests">
+    <div class="module-kicker">4.6 &middot; Sidebar → Purchases → Cash Requests</div>
+    <h3>Cash Requests</h3>
+    <p class="lead">Manages cash advances given to staff for anticipated purchases, from the initial request through to liquidating what was actually spent.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Requested For / Purpose / Needed By</td><td>Header details, with an itemized estimate list.</td></tr><tr><td class="ft-field">Release</td><td>Amount to Release, Cash Source, Release Date — posts Dr 1104 Advances to Employees / Cr the chosen cash account.</td></tr><tr><td class="ft-field">Liquidate</td><td>Actual spend lines with receipts; computes variance — "Sukli to return" if less was spent than released, or "Reimburse" if more.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Cash Request</strong>, list the estimated items, and Submit.</li><li><strong>Approve</strong> the request.</li><li><strong>Release</strong> the cash — choose the funding source; the advance posts to account 1104 and stays outstanding.</li><li>After the employee spends it, click <strong>Liquidate</strong> and enter the actual receipts — Finara computes what is owed back or reimbursed.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Cash Requests workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-aj6q96k" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-aj6q96k)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-aj6q96k)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-aj6q96k)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Submit</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Approve</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Release</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Liquidate</text>
+      
+    </g>
+    </svg>
+    <figcaption>Cash Requests workflow</figcaption>
+  </figure>
+    <div class="callout callout-tip"><p class="callout-label">Tips</p><ul><li>The "Outstanding (1104)" summary card is the key control point — it shows every advance not yet liquidated.</li></ul></div>
+    
+  </section>
+  </section>
+
+  <section class="chapter" id="chapter-5">
+    <div class="chapter-head">
+      <div class="chapter-num">05</div>
+      <div>
+        <h2>Payroll</h2>
+        <p class="chapter-intro">Employee records, running actual pay periods with statutory PH deductions, and a standalone calculator for quick estimates.</p>
+      </div>
+    </div>
+    
+  <section class="module" id="employees">
+    <div class="module-kicker">5.1 &middot; Sidebar → Payroll → Employees</div>
+    <h3>Employees</h3>
+    <p class="lead">Maintains the employee roster — basic info, pay setup, and the government ID numbers required for BIR/SSS/PhilHealth/Pag-IBIG reporting — that payroll computation runs against.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Basic Info</td><td>Employee No. (auto: EMP-001...), Department, Name, Position, Hire Date, Employment Type.</td></tr><tr><td class="ft-field">Payroll</td><td>Basic Monthly Salary, Pay Frequency (Monthly / Semi-Monthly / Weekly) — includes a rough live deduction preview.</td></tr><tr><td class="ft-field">Govt. Numbers</td><td>TIN, SSS No., PhilHealth No., Pag-IBIG No. — required for BIR Form 2316 and the statutory reports.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Employee</strong> and complete the Basic Info, Payroll, and Govt. Numbers tabs.</li><li>Save — the employee is now included in payroll computation while marked Active.</li><li>Click any employee to open their profile drawer: quick stats, last 12 payslips, and a "BIR 2316" button to generate that employee's annual certificate for any of the last 5 years.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Employees workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-s7r0bxl" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-s7r0bxl)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-s7r0bxl)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-s7r0bxl)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Employee</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Fill 3 tabs</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save (Active)</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Included in payroll</text>
+      
+    </g>
+    </svg>
+    <figcaption>Employees workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Inactive employees are excluded from payroll computation entirely.</li></ul></div>
+  </section>
+
+  <section class="module" id="pay-periods">
+    <div class="module-kicker">5.2 &middot; Sidebar → Payroll → Pay Periods</div>
+    <h3>Pay Periods</h3>
+    <p class="lead">Runs an actual payroll cycle through a fixed, government-audit-friendly lifecycle: Open &rarr; Compute &rarr; Approve &rarr; Mark Paid.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">New Period</td><td>Pay Frequency (tag only), Start/End Date, Period Name (auto-suggested), Pay Date.</td></tr><tr><td class="ft-field">View Payslips</td><td>Per-employee Basic, Allowances, Gross, SSS, PhilHealth, Pag-IBIG, Tax, and Net Pay, with column totals.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Period</strong> and set the dates.</li><li>Click <strong>Compute</strong> — Finara runs statutory payroll for every active employee and fills in payslips (only allowed while status is OPEN).</li><li>Review the payslips via <strong>View Payslips</strong>.</li><li>Click <strong>Approve</strong> — this also auto-posts the GL accrual entry (Salaries &amp; Wages, employer-share contributions, and payables).</li><li>Click <strong>Mark Paid</strong> once disbursed — this status is final and cannot be reversed.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Pay Periods workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-sxcatk8" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-sxcatk8)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-sxcatk8)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-sxcatk8)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Open</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Compute</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Approve</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Mark Paid</text>
+      
+    </g>
+    </svg>
+    <figcaption>Pay Periods workflow</figcaption>
+  </figure>
+    <div class="callout callout-tip"><p class="callout-label">Tips</p><ul><li>Print Payroll generates a full Payroll Register citing the exact rate basis used (2024 SSS table, PhilHealth 5%, Pag-IBIG 2%, TRAIN Law 2023 withholding schedule).</li></ul></div>
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Compute, Approve, and Mark Paid can each only run from their specific prior status — trying to compute an already-computed period returns an error.</li></ul></div>
+  </section>
+
+  <section class="module" id="payroll-calculator">
+    <div class="module-kicker">5.3 &middot; Sidebar → Payroll → Calculator</div>
+    <h3>Payroll Calculator</h3>
+    <p class="lead">A standalone, real-time "what-if" estimator for take-home pay — nothing here is saved or affects actual employees or pay periods.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Inputs</td><td>Basic Monthly Salary, Non-Taxable Allowances, Overtime Pay, Pay Frequency.</td></tr><tr><td class="ft-field">Outputs</td><td>Net pay breakdown, SSS/PhilHealth/Pag-IBIG detail, Effective Tax Rate gauge, Annual Projection, 13th Month Pay, Employer Cost per Month, and a Monthly vs. Semi-Monthly vs. Weekly comparison table.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Enter a salary (or use a quick-pick button) and optional allowances/overtime.</li><li>Choose a Pay Frequency.</li><li>Read the results live — everything recomputes as you type.</li><li>Click <strong>Reset</strong> to start over.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 520 102" role="img" aria-label="Payroll Calculator workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-1vx4hjo" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-1vx4hjo)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-1vx4hjo)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Enter salary</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Choose frequency</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Read live results</text>
+      
+    </g>
+    </svg>
+    <figcaption>Payroll Calculator workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>This page uses its own simplified copy of the SSS/tax tables and can differ slightly from the authoritative figures Compute Payroll produces on the Pay Periods page — treat it as an estimate, not a payslip.</li></ul></div>
+  </section>
+  </section>
+
+  <section class="chapter" id="chapter-6">
+    <div class="chapter-head">
+      <div class="chapter-num">06</div>
+      <div>
+        <h2>Inventory &amp; Fixed Assets</h2>
+        <p class="chapter-intro">Tracking stocked items and physical goods movement, plus registering and depreciating long-term fixed assets.</p>
+      </div>
+    </div>
+    
+  <section class="module" id="stock-on-hand">
+    <div class="module-kicker">6.1 &middot; Sidebar → Inventory &amp; Assets → Inventory → Stock on Hand</div>
+    <h3>Stock on Hand</h3>
+    <p class="lead">A read-only, filterable snapshot of current inventory quantity and value — the first stop before acting in Items or Transactions.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Filters</td><td>Search (SKU/name), Category, Type (Product/Material/Supply/Asset).</td></tr><tr><td class="ft-field">Summary cards</td><td>Total Items, Inventory Value, Low Stock count, Out of Stock count.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Open Stock on Hand and review the summary cards.</li><li>Filter/search to find specific items.</li><li>Rows highlight yellow (low stock, at or below reorder level) or red (out of stock) automatically.</li><li>Click <strong>Print</strong> for a hard-copy report, or jump to Items/Transactions to act on what you see.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Stock on Hand workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-rh1ppze" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-rh1ppze)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-rh1ppze)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-rh1ppze)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Open Stock on Hand</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Filter/search</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Spot low/out of stock</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Act in Items or Transactions</text>
+      
+    </g>
+    </svg>
+    <figcaption>Stock on Hand workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+
+  <section class="module" id="items">
+    <div class="module-kicker">6.2 &middot; Sidebar → Inventory &amp; Assets → Inventory → Items</div>
+    <h3>Items</h3>
+    <p class="lead">The item catalog — SKU, pricing, and optional Chart-of-Accounts links (Inventory Asset, COGS, Revenue) used when transactions post to the GL.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">SKU</td><td>Auto-generated as SKU-0001... if left blank; locked once created.</td></tr><tr><td class="ft-field">Name (required), Category, Unit, Reorder Level, Cost/Selling Price</td><td>Core catalog fields.</td></tr><tr><td class="ft-field">GL links</td><td>Inventory Asset Account, COGS Account, Revenue Account — all optional.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Optionally set up Categories first (via the Categories panel).</li><li>Click <strong>New Item</strong>, enter a name (SKU auto-fills), unit, reorder level, and pricing.</li><li>Optionally link the three GL accounts.</li><li>Save — the item is ready to use on Transactions, Purchase Orders, and Quotations.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Items workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-gjdm87e" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-gjdm87e)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-gjdm87e)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-gjdm87e)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Item</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Set pricing/reorder level</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Link GL accounts (optional)</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save</text>
+      
+    </g>
+    </svg>
+    <figcaption>Items workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Duplicate SKUs are rejected. "Deactivate" is a soft delete — item history is preserved.</li></ul></div>
+  </section>
+
+  <section class="module" id="transactions">
+    <div class="module-kicker">6.3 &middot; Sidebar → Inventory &amp; Assets → Inventory → Transactions</div>
+    <h3>Transactions</h3>
+    <p class="lead">Logs every physical stock movement — Stock In, Stock Out, Adjustment, Customer Return, Return to Supplier — building a running, auditable stock balance per item.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Type</td><td>Stock In (IN), Stock Out (OUT), Adjustment, Customer Return (RETURN_IN), Return to Supplier (RETURN_OUT).</td></tr><tr><td class="ft-field">Quantity</td><td>For most types this is the amount moved; for Adjustment it is the actual counted stock — Finara computes the difference for you.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Movement</strong> and pick a type.</li><li>Choose the item and enter Quantity, Unit Cost, Date, and Reference.</li><li>Submit — the item&rsquo;s current stock updates immediately and a sequential transaction number is assigned.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Transactions workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-dvv4fk3" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-dvv4fk3)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-dvv4fk3)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-dvv4fk3)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Movement</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick type + item</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Enter quantity/cost</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Stock balance updates</text>
+      
+    </g>
+    </svg>
+    <figcaption>Transactions workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Stock In / Return In post Dr Inventory / Cr Inventory Payable; Stock Out / Return Out post Dr COGS / Cr Inventory. Adjustments change quantity only — they never touch the GL, so book any related correction manually.</li></ul></div>
+  </section>
+
+  <section class="module" id="inventory-reports">
+    <div class="module-kicker">6.4 &middot; Sidebar → Inventory &amp; Assets → Inventory → Reports</div>
+    <h3>Inventory Reports</h3>
+    <p class="lead">Three printable analytical views for period-end review: Inventory Valuation, Low Stock Alert, and Movement Summary.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Inventory Valuation</td><td>Qty on hand &times; unit cost per item, subtotaled by category.</td></tr><tr><td class="ft-field">Low Stock Alert</td><td>Every item at or below its reorder level, sorted by largest shortage, with an estimated reorder cost.</td></tr><tr><td class="ft-field">Movement Summary</td><td>Total In/Out, net adjustments, and cost In/Out per item over a date range.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Open Reports and pick a tab.</li><li>Adjust the filter (Category, or a date range for Movement Summary).</li><li>Review on screen, then click <strong>Print</strong> for a hard copy.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Inventory Reports workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-bagqeag" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-bagqeag)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-bagqeag)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-bagqeag)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick tab</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Filter</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Review</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Print</text>
+      
+    </g>
+    </svg>
+    <figcaption>Inventory Reports workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+
+  <section class="module" id="fixed-assets">
+    <div class="module-kicker">6.5 &middot; Sidebar → Inventory &amp; Assets → Fixed Assets</div>
+    <h3>Fixed Assets</h3>
+    <p class="lead">Registers long-term assets and runs monthly depreciation (Straight Line or Declining Balance), optionally auto-posting the depreciation journal entry.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">New Asset</td><td>Name, Category, Acquisition Date, Cost, Salvage Value, Useful Life (months), Method.</td></tr><tr><td class="ft-field">Optional GL links</td><td>Asset Account, Depreciation Expense Account, Accumulated Depreciation Account — required for auto-posting.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Asset</strong> and complete cost, useful life, method, and (optionally) the three GL accounts.</li><li>Open the asset&rsquo;s <strong>Schedule</strong> to see the full projected month-by-month depreciation.</li><li>Click <strong>Record Next Period</strong> each period — this books the next month&rsquo;s depreciation and, if GL accounts are set, posts the journal entry automatically.</li><li>When retired or sold, click <strong>Dispose</strong> and enter the disposal amount — Finara computes the resulting gain or loss.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Fixed Assets workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-7ntgrwr" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-7ntgrwr)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-7ntgrwr)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-7ntgrwr)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Register Asset</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Record Next Period (repeat)</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Fully Depreciated</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Dispose</text>
+      
+    </g>
+    </svg>
+    <figcaption>Fixed Assets workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Once any depreciation has posted, only descriptive fields stay editable — cost, dates, method, and accounts lock. An asset with depreciation history cannot be deleted, only disposed.</li></ul></div>
+  </section>
+  </section>
+
+  <section class="chapter" id="chapter-7">
+    <div class="chapter-head">
+      <div class="chapter-num">07</div>
+      <div>
+        <h2>Banking &amp; Compliance</h2>
+        <p class="chapter-intro">Reconciling the bank, filing the five core BIR forms, and tracking SSS/PhilHealth/Pag-IBIG/BIR remittances — the most compliance-dense part of Finara.</p>
+      </div>
+    </div>
+    
+  <section class="module" id="bank-reconciliation">
+    <div class="module-kicker">7.1 &middot; Sidebar → Banking &amp; Compliance → Bank Reconciliation</div>
+    <h3>Bank Reconciliation</h3>
+    <p class="lead">Matches the business&rsquo;s internal bank transaction records against the bank&rsquo;s monthly statement — the control that keeps every downstream report (including VAT and withholding filings) trustworthy.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Bank Account</td><td>Account Name, Bank, Account Number, linked GL Account, Opening Balance.</td></tr><tr><td class="ft-field">Reconcile prompt</td><td>Statement Ending Balance and Statement Date.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Add a bank account and link it to a GL account.</li><li>Log deposits and withdrawals as bank transactions.</li><li>Click <strong>Reconcile</strong> and enter the statement balance/date.</li><li>Tick every transaction that appears on the statement — Cleared and Difference totals update live.</li><li>Click <strong>Complete</strong>. If it doesn't balance to the penny, Finara offers "Complete anyway?" as a forced override.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Bank Reconciliation workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-72alkp9" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-72alkp9)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-72alkp9)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-72alkp9)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Log transactions</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Start Reconcile</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Tick cleared items</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Complete</text>
+      
+    </g>
+    </svg>
+    <figcaption>Bank Reconciliation workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Once a reconciliation is completed, its transactions lock — they can no longer be deleted.</li></ul></div>
+  </section>
+
+  <section class="module" id="vat-summary-form-2550m-2550q">
+    <div class="module-kicker">7.2 &middot; Sidebar → Banking &amp; Compliance → BIR Compliance → VAT Summary</div>
+    <h3>VAT Summary (Form 2550M / 2550Q)</h3>
+    <p class="lead">Computes Output VAT (on sales) against Input VAT (on purchases) to determine what&rsquo;s payable — or creditable — for the Monthly (2550M) or Quarterly (2550Q) VAT return.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Mode</td><td>Monthly (2550M) or Quarterly (2550Q).</td></tr><tr><td class="ft-field">Period</td><td>Year + Month, or Year + Quarter.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Choose Monthly or Quarterly mode and select the period.</li><li>Review the KPI cards (Total Sales, Output VAT, Input VAT, VAT Payable or Excess Input) and the Sales Composition breakdown.</li><li>Check the 2550 Filing Summary box for the exact Part A / Part B figures to file.</li><li>Drill into Supporting Transactions if a number looks off.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="VAT Summary (Form 2550M / 2550Q) workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-fivien9" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-fivien9)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-fivien9)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-fivien9)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Post VAT-coded invoices/bills</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick period</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Review 2550 summary</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">File by due date</text>
+      
+    </g>
+    </svg>
+    <figcaption>VAT Summary (Form 2550M / 2550Q) workflow</figcaption>
+  </figure>
+    <div class="callout callout-tip"><p class="callout-label">Tips</p><ul><li>Due dates: the 20th of the following month for 2550M, the 25th of the month after quarter-end for 2550Q.</li></ul></div>
+    
+  </section>
+
+  <section class="module" id="withholding-tax-form-1601-c">
+    <div class="module-kicker">7.3 &middot; Sidebar → Banking &amp; Compliance → BIR Compliance → Withholding</div>
+    <h3>Withholding Tax (Form 1601-C)</h3>
+    <p class="lead">The Monthly Remittance Return of compensation tax withheld from employees, built directly from approved payroll.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Period</td><td>Year + Month.</td></tr><tr><td class="ft-field">1601-C box</td><td>Part I — Compensation Details; Part II — Tax Computation and Total Amount Payable.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Select the month/year.</li><li>Review the 1601-C form box and the per-payroll-period breakdown table.</li><li>If the period is overdue, use <strong>Estimate Penalty</strong> (surcharge, interest, and compromise penalty) to gauge exposure.</li><li>Remit via AAB or eBIRForms on or before the due date.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Withholding Tax (Form 1601-C) workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-qtn6vxa" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-qtn6vxa)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-qtn6vxa)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-qtn6vxa)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Approve payroll</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick period</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Review 1601-C</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Remit by the 10th</text>
+      
+    </g>
+    </svg>
+    <figcaption>Withholding Tax (Form 1601-C) workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Due date is the 10th of the following month — overdue periods are flagged red with a penalty warning.</li></ul></div>
+  </section>
+
+  <section class="module" id="ewt-summary-form-1601-eq">
+    <div class="module-kicker">7.4 &middot; Sidebar → Banking &amp; Compliance → BIR Compliance → EWT Summary</div>
+    <h3>EWT Summary (Form 1601-EQ)</h3>
+    <p class="lead">The Quarterly Remittance Return of Expanded (Creditable) Withholding Tax deducted from payments to suppliers/vendors.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Period</td><td>Year + Quarter.</td></tr><tr><td class="ft-field">ATC reference</td><td>An expandable panel of official ATC codes and rates for context.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Select year and quarter.</li><li>Review Total Payments, VATable Payments, and Total EWT to Remit.</li><li>Expand a vendor row to see the supporting bills behind their EWT.</li><li>Remit by the last day of the month following quarter-end.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="EWT Summary (Form 1601-EQ) workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-gpzivcu" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-gpzivcu)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-gpzivcu)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-gpzivcu)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Bills over &amp;#8369;10,000</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">2% EWT computed</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick quarter</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">File 1601-EQ</text>
+      
+    </g>
+    </svg>
+    <figcaption>EWT Summary (Form 1601-EQ) workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Finara applies a flat 2% EWT (ATC WC200) to any bill whose net, VAT-exclusive amount exceeds &#8369;10,000 — other ATC rates shown in the reference table are informational only and are not separately computed.</li></ul></div>
+  </section>
+
+  <section class="module" id="alphalist-form-1604-c-annex">
+    <div class="module-kicker">7.5 &middot; Sidebar → Banking &amp; Compliance → BIR Compliance → Alphalist</div>
+    <h3>Alphalist (Form 1604-C Annex)</h3>
+    <p class="lead">The annual alphabetical listing of every employee&rsquo;s compensation, deductions, and tax withheld, filed as an annex to the annual 1604-C return.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Year selector</td><td>Builds the list for the chosen calendar year.</td></tr><tr><td class="ft-field">Missing-TIN banner</td><td>Counts employees without a TIN on file — required before submission.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Select the year.</li><li>Resolve any "Missing TIN Numbers" warning by updating employee records first.</li><li>Review the Top-10 chart and the full alphalist table (sortable by Name, Gross, or Tax).</li><li>File Form 1604-C with this alphalist attached, on or before January 31 of the following year, via eBIRForms or eFPS.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Alphalist (Form 1604-C Annex) workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-yic9m1v" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-yic9m1v)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-yic9m1v)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-yic9m1v)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Fix missing TINs</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick year</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Review alphalist</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">File by Jan 31</text>
+      
+    </g>
+    </svg>
+    <figcaption>Alphalist (Form 1604-C Annex) workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+
+  <section class="module" id="relief-export-sls-slp">
+    <div class="module-kicker">7.6 &middot; Sidebar → Banking &amp; Compliance → BIR Compliance → RELIEF Export</div>
+    <h3>RELIEF Export (SLS/SLP)</h3>
+    <p class="lead">Generates the Summary List of Sales (SLS) and Summary List of Purchases (SLP) — the RELIEF data submitted alongside the quarterly 2550Q VAT return.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Period</td><td>Year + Quarter.</td></tr><tr><td class="ft-field">Exports</td><td>Combined CSV, or separate Sales CSV / Purchases CSV.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Select the year and quarter.</li><li>Resolve any missing-TIN warnings on vendors or customers.</li><li>Review the VAT Reconciliation panel and the Schedule 1 (Sales) / Schedule 2 (Purchases) breakdowns.</li><li>Click <strong>Export CSV</strong> (or the Sales/Purchases-only variants) and submit via eFPS/eBIRForms alongside Form 2550Q.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="RELIEF Export (SLS/SLP) workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-3sdw2ue" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-3sdw2ue)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-3sdw2ue)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-3sdw2ue)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick quarter</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Fix missing TINs</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Export CSV</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Submit with 2550Q</text>
+      
+    </g>
+    </svg>
+    <figcaption>RELIEF Export (SLS/SLP) workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Deadline is the 25th day following the close of each taxable quarter.</li></ul></div>
+  </section>
+
+  <section class="module" id="remittances">
+    <div class="module-kicker">7.7 &middot; Sidebar → Banking &amp; Compliance → Remittances</div>
+    <h3>Remittances</h3>
+    <p class="lead">Tracks the four recurring statutory payroll remittances — SSS, PhilHealth, Pag-IBIG, and BIR 1601-C — from calculation through filing and payment, plus a Daily Report for end-of-day cash reconciliation.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Dashboard</td><td>Overdue count, Filed/Pending count, Due This Month, Total Paid YTD, and upcoming deadlines.</td></tr><tr><td class="ft-field">Gov&amp;rsquo;t Records</td><td>New Remittance drawer: Type, Period, Auto-Calculate (pulls from approved payroll) or Manual Entry.</td></tr><tr><td class="ft-field">Daily Report</td><td>Auto-compiles a day's Sales, Collections, Expenses, Disbursements, and Petty Cash into one closing report.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>On Gov&rsquo;t Records, click <strong>New Remittance</strong>, pick a type and period, then Auto-Calculate or enter amounts manually.</li><li>Save as Draft, review, then click <strong>Mark as Filed</strong> once submitted to the agency.</li><li>Click <strong>Mark as Paid</strong> once remitted — this auto-posts the GL entry (debiting the type's payable account, crediting Cash).</li><li>On the Daily Report, pick a date, click <strong>Generate from Transactions</strong>, review the summary cards, then Submit and Approve.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Remittances workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-dtv3ga9" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-dtv3ga9)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-dtv3ga9)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-dtv3ga9)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Auto-Calculate</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save Draft</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Mark Filed</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Mark Paid</text>
+      
+    </g>
+    </svg>
+    <figcaption>Remittances workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>SSS is due the last day of the month following the period; PhilHealth, Pag-IBIG, and BIR 1601-C are due the 15th.</li><li>Only DRAFT remittance records can be deleted; PAID records are immutable.</li></ul></div>
+  </section>
+  </section>
+
+  <section class="chapter" id="chapter-8">
+    <div class="chapter-head">
+      <div class="chapter-num">08</div>
+      <div>
+        <h2>Planning &amp; Reports</h2>
+        <p class="chapter-intro">Budgeting against actuals, the three PFRS-format financial statements, a daily cashbook, and a builder for one-off custom reports.</p>
+      </div>
+    </div>
+    
+  <section class="module" id="budgeting">
+    <div class="module-kicker">8.1 &middot; Sidebar → Planning &amp; Reports → Budgeting</div>
+    <h3>Budgeting</h3>
+    <p class="lead">Builds annual, account-level budgets and compares them against actual posted activity.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">New Budget</td><td>Name, Fiscal Year, and one or more Account + Annual Amount lines.</td></tr><tr><td class="ft-field">Budget vs Actual</td><td>Per-account Budgeted, Actual, Variance, and Utilization %.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Budget</strong>, name it, and set the fiscal year.</li><li>Add one or more account/amount lines with <strong>+ Add</strong>.</li><li>Click <strong>Create Budget</strong>.</li><li>Click the eye icon anytime to view Budget vs. Actual for that budget.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Budgeting workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-w0x1rvd" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-w0x1rvd)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-w0x1rvd)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-w0x1rvd)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Budget</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Add account lines</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Create</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">View Budget vs Actual</text>
+      
+    </g>
+    </svg>
+    <figcaption>Budgeting workflow</figcaption>
+  </figure>
+    <div class="callout callout-tip"><p class="callout-label">Tips</p><ul><li>Actuals are computed only from POSTED journal entries within the fiscal year — draft entries never count toward "actual."</li></ul></div>
+    
+  </section>
+
+  <section class="module" id="trial-balance">
+    <div class="module-kicker">8.2 &middot; Sidebar → Planning &amp; Reports → Reports → Trial Balance</div>
+    <h3>Trial Balance</h3>
+    <p class="lead">Lists every active account&rsquo;s debit/credit balance as of a chosen date, verifying the books are in balance.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">As of Date</td><td>Defaults to today, cannot be set in the future.</td></tr><tr><td class="ft-field">Balance banner</td><td>Green "in Balance" when debits equal credits; red "Out of Balance" with the exact difference otherwise.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Open Trial Balance — it loads for today by default.</li><li>Change the As of Date if needed, and optionally search or toggle zero-balance accounts.</li><li>Check the balance banner and review any amber "abnormal balance" warnings.</li><li>Click <strong>Print</strong> for a formal document.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Trial Balance workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-uzny9ti" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-uzny9ti)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-uzny9ti)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-uzny9ti)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick date</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Load balances</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Balance banner</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Print</text>
+      
+    </g>
+    </svg>
+    <figcaption>Trial Balance workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+
+  <section class="module" id="income-statement">
+    <div class="module-kicker">8.3 &middot; Sidebar → Planning &amp; Reports → Reports → Income Statement</div>
+    <h3>Income Statement</h3>
+    <p class="lead">The PFRS-format Profit & Loss statement: Revenue &rarr; COGS &rarr; Gross Profit &rarr; Operating Expenses &rarr; Net Income for a chosen period.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Period type</td><td>Month, Quarter, Full Year, or Custom date range.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Choose a period type and the specific period.</li><li>Review the KPI cards (Revenue, Gross Profit, Operating Income, Net Income with margin %).</li><li>Switch between the waterfall chart and the expense-mix pie chart.</li><li>Expand line-item sections for account-level detail, then Print.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Income Statement workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-pz8ck6t" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-pz8ck6t)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-pz8ck6t)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-pz8ck6t)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick period</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Load statement</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Review margins</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Print</text>
+      
+    </g>
+    </svg>
+    <figcaption>Income Statement workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+
+  <section class="module" id="balance-sheet">
+    <div class="module-kicker">8.4 &middot; Sidebar → Planning &amp; Reports → Reports → Balance Sheet</div>
+    <h3>Balance Sheet</h3>
+    <p class="lead">The PFRS-format Statement of Financial Position (Assets = Liabilities + Equity) as of a chosen date, with built-in ratio analysis.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">As of Date</td><td>Defaults to today.</td></tr><tr><td class="ft-field">Financial ratios</td><td>Current Ratio, Debt Ratio, Debt-to-Equity, Equity Ratio, color-coded against standard thresholds.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Open Balance Sheet — it loads for today by default.</li><li>Change the As of Date if needed.</li><li>Review the accounting-equation balance banner and financial ratio panel.</li><li>Expand Assets, Liabilities, and Equity sections, then Print.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Balance Sheet workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-tvsfumc" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-tvsfumc)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-tvsfumc)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-tvsfumc)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Pick date</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Load statement</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Check ratios</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Print</text>
+      
+    </g>
+    </svg>
+    <figcaption>Balance Sheet workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>A red balance banner (Assets &ne; Liabilities + Equity) means there are unposted or misclassified entries to track down before trusting the report.</li></ul></div>
+  </section>
+
+  <section class="module" id="cash-position">
+    <div class="module-kicker">8.5 &middot; Sidebar → Planning &amp; Reports → Reports → Cash Position</div>
+    <h3>Cash Position</h3>
+    <p class="lead">A day-by-day running cashbook per cash account (accounts coded 10xx) over a date range, with per-transaction drill-down.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">From / To date</td><td>Defaults to first-of-month through today; capped at a 366-day range.</td></tr><tr><td class="ft-field">Account</td><td>All cash accounts, or one specific account.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Set the From/To range (and optionally a specific account).</li><li>Click <strong>Generate</strong> — nothing loads until you do.</li><li>Review each account&rsquo;s Opening Balance and daily Beginning/In/Out/Ending rows.</li><li>Click any date row to drill into the individual journal lines behind it, then Print.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Cash Position workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-3u7zjau" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-3u7zjau)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-3u7zjau)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-3u7zjau)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Set date range</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Generate</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Review daily cashbook</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Drill into a day</text>
+      
+    </g>
+    </svg>
+    <figcaption>Cash Position workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>The date range cannot exceed 366 days.</li></ul></div>
+  </section>
+
+  <section class="module" id="custom-reports">
+    <div class="module-kicker">8.6 &middot; Sidebar → Planning &amp; Reports → Reports → Custom Reports</div>
+    <h3>Custom Reports</h3>
+    <p class="lead">A 3-step builder for saving and re-running your own report definitions: Account Balance, Period Comparison, Account Movement, or Profit &amp; Loss.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Step 1</td><td>Report Name, Description, and one of the 4 report types.</td></tr><tr><td class="ft-field">Step 2</td><td>Type-specific date parameters plus an account-type/specific-account filter.</td></tr><tr><td class="ft-field">Step 3</td><td>Live preview before saving.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Report</strong>, name it, and pick a type.</li><li>Configure the date range and account filters.</li><li>Click <strong>Preview</strong> to check the output.</li><li>Click <strong>Save Report</strong> — you land on its own page, where you can Run it again anytime with current data.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Custom Reports workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-923dkmc" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-923dkmc)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-923dkmc)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-923dkmc)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Name + type</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Configure filters</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Preview</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save Report</text>
+      
+    </g>
+    </svg>
+    <figcaption>Custom Reports workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+  </section>
+
+  <section class="chapter" id="chapter-9">
+    <div class="chapter-head">
+      <div class="chapter-num">09</div>
+      <div>
+        <h2>Settings &amp; Administration</h2>
+        <p class="chapter-intro">Company configuration, user management, multi-business setup, opening balances, backups, and the audit trail — mostly ADMIN/MANAGER territory.</p>
+      </div>
+    </div>
+    
+  <section class="module" id="company-fiscal-tax-payroll-and-numbering">
+    <div class="module-kicker">9.1 &middot; Sidebar → Settings → (tabs)</div>
+    <h3>Company, Fiscal &amp; Tax, Payroll, and Numbering</h3>
+    <p class="lead">A tabbed settings screen covering company profile, PH tax registration, statutory contribution rates, and document numbering — each tab role-gated (ADMIN/MANAGER).</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Company</td><td>Logo, Business Name, Email, Address, Phone, Website.</td></tr><tr><td class="ft-field">Fiscal &amp;amp; Tax</td><td>Fiscal Year Start, Accounting Method, Company TIN, RDO code, VAT Registration Date/Filing Type (2550M/2550Q), VAT Registered toggle.</td></tr><tr><td class="ft-field">Payroll</td><td>Cut-off days, SSS/PhilHealth/Pag-IBIG employer rates, default BIR tax exemption code.</td></tr><tr><td class="ft-field">Numbering</td><td>Prefix + starting number for Sales Invoice, Bill, Journal Entry, and Payment/Receipt.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Open Settings and select the relevant tab.</li><li>Edit the fields — a "You have unsaved changes" banner and sticky save bar appear.</li><li>Click <strong>Save Settings</strong>, or <strong>Discard</strong> to abandon changes.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 520 102" role="img" aria-label="Company, Fiscal &amp; Tax, Payroll, and Numbering workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-xg24jt4" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-xg24jt4)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-xg24jt4)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Open tab</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Edit fields</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save Settings</text>
+      
+    </g>
+    </svg>
+    <figcaption>Company, Fiscal &amp; Tax, Payroll, and Numbering workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Changing a numbering prefix/next-number only affects documents created after saving — existing document numbers never change.</li></ul></div>
+  </section>
+
+  <section class="module" id="users-roles">
+    <div class="module-kicker">9.2 &middot; Sidebar → Settings → Users (ADMIN only)</div>
+    <h3>Users &amp; Roles</h3>
+    <p class="lead">Creates and manages user accounts and their role, which controls what they can see and do across every module.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Roles</td><td>ADMIN (full access incl. user/database management), MANAGER (view all + approve), ACCOUNTANT (create/post entries, bills, invoices, payroll), VIEWER (read-only; never sees Payroll).</td></tr><tr><td class="ft-field">New User</td><td>First/Last Name, Email, Role, Password (min 8 characters).</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New User</strong>, fill in name/email/role/password.</li><li>Save — the account can now sign in with that role&rsquo;s permissions.</li><li>Use <strong>Reset Password</strong>, the Activate/Deactivate toggle, or <strong>Delete</strong> from the table as needed.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Users &amp; Roles workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-sqavqu6" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-sqavqu6)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-sqavqu6)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-sqavqu6)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New User</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Assign role</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Manage (reset/deactivate)</text>
+      
+    </g>
+    </svg>
+    <figcaption>Users &amp; Roles workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Choosing ADMIN shows a red "full access" warning in the form — grant it sparingly.</li></ul></div>
+  </section>
+
+  <section class="module" id="businesses-multi-company">
+    <div class="module-kicker">9.3 &middot; Sidebar → Settings → Businesses (ADMIN only)</div>
+    <h3>Businesses (Multi-Company)</h3>
+    <p class="lead">Creates additional companies/entities inside the same Finara account, each with its own books, and controls which users can access which business.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">New Business</td><td>Code (locked after creation), Name, TIN, contact/address, Books Start Date.</td></tr><tr><td class="ft-field">Books Start Date</td><td>The first day this business keeps its books in Finara — documents before it are historical only and never post to the GL.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Click <strong>New Business</strong> and fill in Code and Name (required).</li><li>Optionally set the Books Start Date if you are migrating from another system.</li><li>Click <strong>Save Business</strong> — the Chart of Accounts is automatically cloned from the default business, and all ADMIN users get access automatically.</li><li>Use the <strong>Users</strong> button to grant/revoke access for non-admin users via toggle switches.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Businesses (Multi-Company) workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-xnpjjv2" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-xnpjjv2)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-xnpjjv2)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-xnpjjv2)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">New Business</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Save (COA cloned)</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Grant user access</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Switch via header</text>
+      
+    </g>
+    </svg>
+    <figcaption>Businesses (Multi-Company) workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Non-admin users only see businesses explicitly granted to them.</li></ul></div>
+  </section>
+
+  <section class="module" id="opening-balances">
+    <div class="module-kicker">9.4 &middot; Sidebar → Settings → Opening Balances</div>
+    <h3>Opening Balances</h3>
+    <p class="lead">A one-time, per-business setup screen that records a business&rsquo;s day-one financial position as of its Books Start Date, so pre-cutover history doesn&rsquo;t need re-entry.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Precondition</td><td>The business must already have a Books Start Date set under Settings → Businesses.</td></tr><tr><td class="ft-field">Lines</td><td>Account, Debit, Credit — the difference auto-balances against account 3070 Opening Balance Equity.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Enter what customers still owe (AR), what&rsquo;s still owed to vendors (AP), and actual cash/bank balances as of the cutover date.</li><li>Confirm Total Debit equals Total Credit (the 3070 line balances it automatically).</li><li>Click <strong>Post Opening Balances</strong> — this can only be done once per business.</li><li>Review the reconciliation panel afterward, which compares AR/AP subledger totals against the posted opening figures.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Opening Balances workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-eqdw50n" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-eqdw50n)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-eqdw50n)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-eqdw50n)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Set Books Start Date</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Enter AR/AP/cash lines</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Post Opening Balances</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Reconcile</text>
+      
+    </g>
+    </svg>
+    <figcaption>Opening Balances workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Once posted, the entry is locked — to change it you must first reverse the OPENING-BALANCE journal entry in the General Ledger.</li></ul></div>
+  </section>
+
+  <section class="module" id="database-backup-restore-reset">
+    <div class="module-kicker">9.5 &middot; Sidebar → Settings → Database (ADMIN only)</div>
+    <h3>Database — Backup, Restore &amp; Reset</h3>
+    <p class="lead">Exports and restores data by module, and provides two destructive reset paths — use with real caution, especially Full Database Reset.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Module-level Export</td><td>Checkbox-select modules → downloads a dated JSON backup file.</td></tr><tr><td class="ft-field">Restore from Backup File</td><td>Upload a .json file, pick which of its modules to restore, and choose whether to wipe existing data first.</td></tr><tr><td class="ft-field">Reset Selected Modules</td><td>Type RESET to confirm; deletes data for chosen modules only (users/settings preserved).</td></tr><tr><td class="ft-field">Full Database Reset</td><td>Type RESET DATABASE plus your admin password; deletes essentially all transactional data.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Before any destructive action, run a <strong>Module-level Export</strong> (or Full Database Backup) and save the file somewhere safe.</li><li>To restore, upload the backup, select modules, decide whether to wipe existing data first, and confirm.</li><li>For a partial wipe, use Reset Selected Modules and type the exact confirmation phrase.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 698 102" role="img" aria-label="Database — Backup, Restore &amp; Reset workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-f77x2jz" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-f77x2jz)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-f77x2jz)"/>
+      <line x1="508" y1="51" x2="541" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-f77x2jz)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Backup first</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Export/Restore/Reset</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Type confirmation phrase</text>
+      
+    </g>
+    <g>
+      <rect x="550" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="616" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Verify result</text>
+      
+    </g>
+    </svg>
+    <figcaption>Database — Backup, Restore &amp; Reset workflow</figcaption>
+  </figure>
+    
+    <div class="callout callout-warn"><p class="callout-label">Watch out for</p><ul><li>Restoring or resetting a module you don't fully back up first can leave dangling references (e.g. a bill pointing at a vendor that no longer exists) — always back up before restoring or resetting, and restore/reset a whole module together, not just part of it.</li><li>Full Database Reset is irreversible and deletes journal entries, bills, invoices, payroll, and the Chart of Accounts — users and settings are the only things preserved.</li></ul></div>
+  </section>
+
+  <section class="module" id="system-permissions-inquiries">
+    <div class="module-kicker">9.6 &middot; Sidebar → Settings → System / Permissions / Inquiries</div>
+    <h3>System, Permissions &amp; Inquiries</h3>
+    <p class="lead">Rounds out administration: environment-level preferences, a fine-grained module&times;role permission matrix, and incoming website contact-form leads.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">System</td><td>Timezone (default Asia/Manila), report decimal places, session timeout, password/audit toggles.</td></tr><tr><td class="ft-field">Permissions</td><td>A module &times; role matrix of toggle switches (some locked always-on/off).</td></tr><tr><td class="ft-field">Inquiries</td><td>A table of website leads with status NEW/CONTACTED/CLOSED.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Adjust System preferences and Save.</li><li>On Permissions, toggle module access per role — changes apply immediately, no reload needed.</li><li>On Inquiries, click a row to expand the full message and update its status as you follow up.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 520 102" role="img" aria-label="System, Permissions &amp; Inquiries workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-cpglraa" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-cpglraa)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-cpglraa)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">System tab</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Permissions matrix</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Inquiries table</text>
+      
+    </g>
+    </svg>
+    <figcaption>System, Permissions &amp; Inquiries workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+
+  <section class="module" id="audit-trail">
+    <div class="module-kicker">9.7 &middot; Sidebar → Settings → Audit Trail</div>
+    <h3>Audit Trail</h3>
+    <p class="lead">A filterable, exportable log of every create/update/delete/post/void/login action in the system, with who did it, when, and from what IP.</p>
+    <table class="fields-table"><tbody><tr><td class="ft-field">Filters</td><td>Search, Action, Entity, From/To date.</td></tr><tr><td class="ft-field">Row detail</td><td>Click a row to expand the raw JSON change diff underneath.</td></tr></tbody></table>
+    <h4>How to do it</h4>
+    <ol class="steps"><li>Open Audit Trail (from the sidebar footer, or Settings → Audit Trail tab).</li><li>Filter by action, entity, date range, or free text.</li><li>Click a row to inspect exactly what changed.</li><li>Click <strong>Export CSV</strong> for a compliance-ready record of the currently loaded rows.</li></ol>
+    
+  <figure class="flow-figure">
+    <svg viewBox="0 0 520 102" role="img" aria-label="Audit Trail workflow" class="flow-svg">
+      <defs>
+        <marker id="fd-arrow-thypvu8" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <polygon points="0,0 9,4 0,8" fill="currentColor"/>
+        </marker>
+      </defs>
+      
+      <line x1="152" y1="51" x2="185" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-thypvu8)"/>
+      <line x1="330" y1="51" x2="363" y2="51" stroke="currentColor" stroke-width="1.5" marker-end="url(#fd-arrow-thypvu8)"/>
+      
+    <g>
+      <rect x="16" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="82" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Filter</text>
+      
+    </g>
+    <g>
+      <rect x="194" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="260" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Inspect row</text>
+      
+    </g>
+    <g>
+      <rect x="372" y="24" width="132" height="54" rx="8"
+            fill="none"
+            stroke="currentColor" stroke-width="1.5"/>
+      <text x="438" y="47" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Export CSV</text>
+      
+    </g>
+    </svg>
+    <figcaption>Audit Trail workflow</figcaption>
+  </figure>
+    
+    
+  </section>
+  </section>
+
+  <footer class="doc-footer">
+    Finara &middot; Philippine-Compliant ERP &middot; Prepared August 10, 2026<br>
+    All monetary figures in Philippine Peso (&#8369;) &middot; Rates cited reflect the 2024 SSS table, PhilHealth 5%, Pag-IBIG 2%, and TRAIN Law 2023 brackets in effect at time of writing.
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Build output
+.next/
+dist/
+build/
+
+# Prisma generated client
+**/.prisma/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Uploaded files (user attachments)
+uploads/
+
+# Database backups
+backups/
+
+# Misc
+*.tmp
+git-error-*
+
+# Subagent-driven-development scratch (progress ledger, task briefs/reports)
+.superpowers/

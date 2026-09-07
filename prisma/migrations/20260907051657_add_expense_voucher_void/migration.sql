@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `expense_vouchers` ADD COLUMN `voidedAt` DATETIME(3) NULL,
+    ADD COLUMN `voidedReason` TEXT NULL,
+    MODIFY `status` ENUM('DRAFT', 'SUBMITTED', 'APPROVED', 'PAID', 'REJECTED', 'VOID') NOT NULL DEFAULT 'DRAFT';

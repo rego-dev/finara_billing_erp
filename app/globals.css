@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  * { @apply border-gray-200 dark:border-gray-700; }
+  /* 14px base on mobile → 16px on desktop */
+  html { font-size: 14px; }
+  @media (min-width: 1024px) { html { font-size: 16px; } }
+  body { @apply bg-gray-50 text-gray-900 font-sans antialiased dark:bg-gray-950 dark:text-gray-100; }
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed dark:focus:ring-offset-gray-900; }
+  .btn-primary { @apply btn bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500; }
+  .btn-secondary { @apply btn bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700; }
+  .btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500; }
+  .btn-success { @apply btn bg-green-600 text-white hover:bg-green-700 focus:ring-green-500; }
+  .btn-sm { @apply px-3 py-1.5 text-xs; }
+  .btn-lg { @apply px-6 py-3 text-base; }
+
+  /* Read-only mode (VIEWER role): hide every write action app-wide.
+     Create / Save / Delete / Void / Approve / Pay all use these classes,
+     so the whole app becomes look-but-don't-touch for viewers. */
+  [data-readonly='true'] .btn-primary,
+  [data-readonly='true'] .btn-danger,
+  [data-readonly='true'] .btn-success { display: none !important; }
+
+  .input { @apply w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500; }
+  .label { @apply block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300; }
+  .select { @apply input cursor-pointer; }
+
+  .card { @apply bg-white rounded-xl border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-800; }
+  .card-header { @apply px-6 py-4 border-b border-gray-200 flex items-center justify-between dark:border-gray-800; }
+  .card-body { @apply p-6; }
+
+  .table-wrapper { @apply overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800; }
+  .table { @apply w-full text-xs lg:text-sm text-left; }
+  .table th { @apply bg-gray-50 px-3 lg:px-4 py-2 lg:py-3 font-semibold text-gray-600 text-[10px] lg:text-xs uppercase tracking-wider border-b border-gray-200 whitespace-nowrap dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700; }
+  .table td { @apply px-3 lg:px-4 py-2 lg:py-3 border-b border-gray-100 text-gray-700 dark:border-gray-800 dark:text-gray-300; }
+  .table tr:last-child td { @apply border-b-0; }
+  .table tr:hover td { @apply bg-gray-50 dark:bg-gray-800/60; }
+
+  /* Editable line-item grids inside modals. Use with .table:
+     <table className="table table-compact">. Trims the cell gutters and the
+     padding of the fields inside so inputs sit side by side, not far apart. */
+  .table-compact th { @apply px-2 lg:px-2 py-2; }
+  .table-compact td { @apply px-1.5 lg:px-1.5 py-2; }
+  .table-compact th:first-child,
+  .table-compact td:first-child { @apply pl-3 lg:pl-3; }
+  .table-compact th:last-child,
+  .table-compact td:last-child { @apply pr-3 lg:pr-3; }
+  .table-compact .input,
+  .table-compact .select { @apply px-2 py-1.5 text-xs; }
+
+  .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+  .badge-blue { @apply badge bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300; }
+  .badge-green { @apply badge bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300; }
+  .badge-yellow { @apply badge bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300; }
+  .badge-red { @apply badge bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300; }
+  .badge-gray { @apply badge bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300; }
+  .badge-purple { @apply badge bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300; }
+
+  .stat-card { @apply card p-3 lg:p-5 flex items-start gap-3 lg:gap-4; }
+  .stat-icon { @apply w-9 h-9 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center flex-shrink-0; }
+  .stat-value { @apply text-lg lg:text-2xl font-bold text-gray-900 mt-0.5 dark:text-gray-100; }
+  .stat-label { @apply text-xs lg:text-sm text-gray-500 dark:text-gray-400; }
+
+  /* ── Top-drawer dialogs ── */
+  .modal-overlay { @apply fixed inset-0 bg-black/50 z-50 flex justify-center items-start overflow-y-auto dark:bg-black/70; }
+  .modal {
+    @apply bg-white shadow-2xl w-full flex flex-col dark:bg-gray-900;
+    border-radius: 0 0 1rem 1rem;
+    max-height: 94vh;
+    animation: topDrawerIn 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .modal-header { @apply px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0 dark:border-gray-800; }
+  .modal-body   { @apply p-4 lg:p-6 overflow-y-auto flex-1; }
+  .modal-footer { @apply px-4 lg:px-6 py-3 lg:py-4 border-t border-gray-200 flex flex-wrap items-center justify-end gap-3 flex-shrink-0 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50; }
+  /* Notes field that fills the empty left half of a modal footer.
+     Wraps above the buttons on small screens. */
+  .footer-notes { @apply mr-auto w-full sm:w-auto sm:flex-1 sm:max-w-md flex items-center gap-2; }
+  .footer-notes .input { @apply py-1.5 text-sm bg-white; }
+
+  /* Page header — stacks vertically on mobile */
+  .page-header { @apply mb-4 lg:mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between; }
+  .page-title { @apply text-lg lg:text-2xl font-bold text-gray-900 dark:text-gray-100; }
+  .page-subtitle { @apply text-xs lg:text-sm text-gray-500 mt-0.5 dark:text-gray-400; }
+
+  /* Responsive table wrapper — always horizontal-scroll on mobile */
+  .table-responsive { @apply overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0; }
+
+  /* Card body compact on mobile */
+  .card-body { @apply p-4 lg:p-6; }
+  .card-header { @apply px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-200 flex items-center justify-between dark:border-gray-800; }
+
+  /* Stats grid — 2 cols on mobile, more on larger */
+  .stats-grid { @apply grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4; }
+
+  /* Filter card — inputs wrap on mobile */
+  .filter-row { @apply flex flex-wrap gap-2; }
+  .filter-row .input { @apply min-w-0; }
+
+  .sidebar-link { @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors; }
+  .sidebar-link-active { @apply sidebar-link bg-blue-600 text-white; }
+  .sidebar-link-inactive { @apply sidebar-link text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100; }
+
+  .form-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-4; }
+  .form-group { @apply space-y-1; }
+  .form-error { @apply text-xs text-red-500 mt-1; }
+}
+
+/* ─── Dark-mode fallbacks for raw utility classes used inline in pages ───
+   Pages use Tailwind colour utilities directly (bg-white, text-gray-700, …).
+   These rules remap the most common light surfaces/text to dark equivalents
+   so existing pages adapt without editing each one. Component classes above
+   already handle the structural chrome. */
+.dark .bg-white { background-color: #111827 !important; }      /* gray-900 */
+.dark .bg-gray-50 { background-color: #1f2937 !important; }     /* gray-800 */
+.dark .bg-gray-100 { background-color: #374151 !important; }    /* gray-700 */
+.dark .text-gray-900 { color: #f3f4f6 !important; }
+.dark .text-gray-800 { color: #e5e7eb !important; }
+.dark .text-gray-700 { color: #d1d5db !important; }
+.dark .text-gray-600 { color: #9ca3af !important; }
+.dark .text-gray-500 { color: #9ca3af !important; }
+.dark .text-gray-400 { color: #6b7280 !important; }
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300 { border-color: #374151 !important; }
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #374151 !important; }
+/* keep hover surfaces subtle in dark */
+.dark .hover\:bg-gray-50:hover { background-color: #1f2937 !important; }
+.dark .hover\:bg-blue-50:hover { background-color: rgba(37, 99, 235, 0.15) !important; }
+/* soft tinted info boxes -> muted dark */
+.dark .bg-blue-50 { background-color: rgba(37, 99, 235, 0.12) !important; }
+.dark .bg-amber-50 { background-color: rgba(217, 119, 6, 0.12) !important; }
+.dark .bg-green-50 { background-color: rgba(22, 163, 74, 0.14) !important; }
+.dark .bg-red-50 { background-color: rgba(220, 38, 38, 0.14) !important; }
+
+/* ─── Top-drawer slide-in ─────────────────────────────────────── */
+@keyframes topDrawerIn {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+/* ─── Page stagger transition ──────────────────────────────────
+   .page-stagger   = PageTransition wrapper (remounts on every nav via key)
+   > *             = page root div  (e.g. <div className="space-y-5">)
+   > * > *         = each card / section / header inside that root div
+   ──────────────────────────────────────────────────────────── */
+@keyframes stagger-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-stagger > * > * {
+  animation: stagger-up 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.page-stagger > * > *:nth-child(1)  { animation-delay:   0ms; }
+.page-stagger > * > *:nth-child(2)  { animation-delay:  65ms; }
+.page-stagger > * > *:nth-child(3)  { animation-delay: 120ms; }
+.page-stagger > * > *:nth-child(4)  { animation-delay: 168ms; }
+.page-stagger > * > *:nth-child(5)  { animation-delay: 210ms; }
+.page-stagger > * > *:nth-child(6)  { animation-delay: 246ms; }
+.page-stagger > * > *:nth-child(7)  { animation-delay: 278ms; }
+.page-stagger > * > *:nth-child(8)  { animation-delay: 306ms; }
+.page-stagger > * > *:nth-child(9)  { animation-delay: 330ms; }
+.page-stagger > * > *:nth-child(10) { animation-delay: 350ms; }
+
+/* Don't animate inside print */
+@media print {
+  .page-stagger > * > * {
+    animation: none !important;
+  }
+}
