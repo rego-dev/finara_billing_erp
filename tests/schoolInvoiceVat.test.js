@@ -2,6 +2,7 @@ jest.mock('../server/config/database', () => ({
   invoice:     { findFirst: jest.fn(), create: jest.fn() },
   installment: { update: jest.fn() },
   assessment:  { update: jest.fn() },
+  studentLedger: { findFirst: jest.fn(), create: jest.fn() },
   business:    { findUnique: jest.fn() },
   systemSetting: { findUnique: jest.fn() },
   $transaction: jest.fn(),
@@ -29,6 +30,8 @@ beforeEach(() => {
   prisma.business.findUnique.mockResolvedValue({ booksStartDate: null });
   prisma.systemSetting.findUnique.mockResolvedValue({ value: 'ON_BILLING' });
   prisma.invoice.findFirst.mockResolvedValue(null);
+  prisma.studentLedger.findFirst.mockResolvedValue(null);
+  prisma.studentLedger.create.mockImplementation(async ({ data }) => ({ id: 1, ...data }));
 
   // Run the transaction body against the mocked client and hand back the
   // invoice it built, so the totals under test are the ones actually written.
@@ -96,6 +99,36 @@ describe('school invoice VAT treatment', () => {
     // posting again here would double-count AR and revenue.
     expect(glPost.safePost).not.toHaveBeenCalled();
     expect(r2(invoice.totalAmount)).toBe(4090);
+  });
+
+  test('under ON_BILLING the charge lands on the student ledger once, at the gross', async () => {
+    const lines = [
+      { accountId: 101, description: 'Tuition', vatCode: 'EXEMPT', amount: 3814.71 },
+      { accountId: 104, description: 'Books',   vatCode: 'VAT',    amount: 275.29 },
+    ];
+    await schoolInvoice.billInstallment({ installment, lines, student, businessId: 6, userId: 1 });
+
+    expect(prisma.studentLedger.create).toHaveBeenCalledTimes(1);
+    const row = prisma.studentLedger.create.mock.calls[0][0].data;
+    // The parent owes the VAT-inclusive total, not the ex-VAT subtotal.
+    expect(r2(row.debit)).toBe(4090);
+    expect(row.credit).toBe(0);
+    expect(row.type).toBe('CHARGE');
+    expect(row.studentId).toBe(student.id);
+    // First row for this student: seq 1, and the balance is the charge itself.
+    expect(row.seq).toBe(1);
+    expect(r2(row.balance)).toBe(4090);
+  });
+
+  test('under ON_ASSESSMENT the invoice is a notice, so it adds no ledger row', async () => {
+    prisma.systemSetting.findUnique.mockResolvedValue({ value: 'ON_ASSESSMENT' });
+    const lines = [{ accountId: 101, description: 'Tuition', vatCode: 'EXEMPT', amount: 4090 }];
+
+    await schoolInvoice.billInstallment({ installment, lines, student, businessId: 6, userId: 1 });
+
+    // The whole year was charged when the assessment was issued — charging
+    // again here would show the parent double what they owe.
+    expect(prisma.studentLedger.create).not.toHaveBeenCalled();
   });
 
   test('refuses to bill before the books start, rather than posting nothing silently', async () => {
