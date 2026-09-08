@@ -12,6 +12,7 @@ const prisma = require('../config/database');
 const { createError } = require('../middleware/errorHandler');
 const { nextDocNumber } = require('../utils/docNumber');
 const { recordAudit } = require('../utils/audit');
+const policy = require('../utils/schoolPolicy');
 
 const fullName = (s) =>
   [s.lastName + ',', s.firstName, s.middleName, s.suffix].filter(Boolean).join(' ');
@@ -174,6 +175,12 @@ exports.createStudent = async (req, res, next) => {
               lastName, firstName,
               middleName: middleName || null,
               suffix:     suffix || null,
+              // The registry form is personal-info-only — no enrollment, no
+              // assessment, no payment happens here. Only
+              // advanceEnrollmentStatus (schoolBillingController.js), after
+              // the seat-holding installment is paid, may move a student past
+              // this stage.
+              status:     'APPLICANT',
               birthDate:  birthDate ? new Date(birthDate) : null,
               gender:     gender || null,
               address:    address || null,
@@ -310,9 +317,17 @@ exports.saveGuardians = async (req, res, next) => {
  * Everything the cashier needs on one screen: what was assessed, what has been
  * billed, what was paid, and what is still owed.
  *
- * Outstanding is computed from invoices, not from the assessment — the invoice
- * is where the money actually lives, and an assessment that was never billed
- * owes nothing yet.
+ * Which subledger holds the receivable depends on the revenue policy, same as
+ * schoolReportsController.delinquencyReport:
+ *
+ *   ON_BILLING     Outstanding is computed from invoices — the invoice is
+ *                  where the money actually lives, and an assessment that was
+ *                  never billed owes nothing yet.
+ *   ON_ASSESSMENT  The full year was booked when the assessment posted, so
+ *                  invoices only cover what has been billed so far. Reading
+ *                  invoices alone would understate what the student owes by
+ *                  everything not yet billed — the assessment (and its
+ *                  installment schedule, for aging) is the receivable instead.
  */
 exports.getLedger = async (req, res, next) => {
   try {
@@ -353,17 +368,35 @@ exports.getLedger = async (req, res, next) => {
     ]);
 
     const live = invoices.filter((i) => i.status !== 'VOID');
-    const totalBilled     = live.reduce((s, i) => s + Number(i.totalAmount), 0);
-    const totalPaid       = live.reduce((s, i) => s + Number(i.paidAmount), 0);
-    const outstanding     = Math.round((totalBilled - totalPaid) * 100) / 100;
     const unappliedCredit = advances.reduce(
       (s, a) => s + (Number(a.amount) - Number(a.appliedAmount)), 0
     );
-
     const today = new Date();
-    const overdue = live
-      .filter((i) => Number(i.totalAmount) - Number(i.paidAmount) > 0.01 && new Date(i.dueDate) < today)
-      .reduce((s, i) => s + (Number(i.totalAmount) - Number(i.paidAmount)), 0);
+
+    const revenuePolicy = await policy.getPolicy(req.businessId);
+    let totalBilled, totalPaid, outstanding, overdue;
+
+    if (revenuePolicy === policy.ON_ASSESSMENT) {
+      const issued = assessments.filter((a) => ['POSTED', 'PARTIALLY_PAID', 'PAID'].includes(a.status));
+      totalBilled = issued.reduce((s, a) => s + (Number(a.netAmount) - Number(a.subsidyAmount)), 0);
+      totalPaid   = issued.reduce((s, a) => s + Number(a.paidAmount), 0);
+      outstanding = Math.round((totalBilled - totalPaid) * 100) / 100;
+      overdue = issued
+        .flatMap((a) => a.installments)
+        .filter((inst) => inst.status !== 'CANCELLED')
+        .reduce((s, inst) => {
+          const balance = Number(inst.amount) - Number(inst.paidAmount);
+          if (balance <= 0.01 || new Date(inst.dueDate) >= today) return s;
+          return s + balance;
+        }, 0);
+    } else {
+      totalBilled = live.reduce((s, i) => s + Number(i.totalAmount), 0);
+      totalPaid   = live.reduce((s, i) => s + Number(i.paidAmount), 0);
+      outstanding = Math.round((totalBilled - totalPaid) * 100) / 100;
+      overdue = live
+        .filter((i) => Number(i.totalAmount) - Number(i.paidAmount) > 0.01 && new Date(i.dueDate) < today)
+        .reduce((s, i) => s + (Number(i.totalAmount) - Number(i.paidAmount)), 0);
+    }
 
     res.json({
       student: { ...student, fullName: fullName(student) },
@@ -460,6 +493,7 @@ exports.importStudents = async (req, res, next) => {
             lastName:   r.lastName, firstName: r.firstName,
             middleName: r.middleName || null,
             suffix:     r.suffix || null,
+            status:     'APPLICANT',
             birthDate:  r.birthDate ? new Date(r.birthDate) : null,
             gender:     r.gender || null,
             address:    r.address || null,

@@ -1352,7 +1352,7 @@ model Student {
   // payments and aging need no school-specific branch.
   customerId   Int           @unique
   customer     Customer      @relation(fields: [customerId], references: [id])
-  status       StudentStatus @default(ENROLLED)
+  status       StudentStatus @default(APPLICANT)
   notes        String?       @db.Text
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -1777,7 +1777,7 @@ model StudentLedger {
   createdAt    DateTime        @default(now())
 
   @@index([businessId])
-  @@index([studentId, seq])
+  @@unique([studentId, seq])
   @@index([entryDate])
   @@index([type])
   @@map("student_ledgers")

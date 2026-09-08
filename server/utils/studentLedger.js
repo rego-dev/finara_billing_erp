@@ -62,31 +62,43 @@ async function append(tx, entry) {
     throw new Error('A ledger row is a debit or a credit, never both');
   }
 
-  const last = await tx.studentLedger.findFirst({
-    where:   { studentId: Number(entry.studentId) },
-    orderBy: { seq: 'desc' },
-    select:  { seq: true, balance: true },
-  });
+  // seq/balance are read-then-written against the last row for this student.
+  // A unique index on (studentId, seq) turns a concurrent writer racing the
+  // same read into a P2002 on create, instead of two rows silently sharing a
+  // seq or carrying a stale balance — retry against a fresh read when that
+  // happens rather than corrupting the account.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const last = await tx.studentLedger.findFirst({
+      where:   { studentId: Number(entry.studentId) },
+      orderBy: { seq: 'desc' },
+      select:  { seq: true, balance: true },
+    });
 
-  const seq     = (last?.seq || 0) + 1;
-  const balance = round2(Number(last?.balance || 0) + debit - credit);
+    const seq     = (last?.seq || 0) + 1;
+    const balance = round2(Number(last?.balance || 0) + debit - credit);
 
-  return tx.studentLedger.create({
-    data: {
-      businessId:   Number(entry.businessId),
-      studentId:    Number(entry.studentId),
-      entryDate:    entry.entryDate instanceof Date ? entry.entryDate : new Date(entry.entryDate),
-      seq,
-      type:         entry.type,
-      reference:    entry.reference || null,
-      description:  String(entry.description).slice(0, 255),
-      debit, credit, balance,
-      assessmentId: entry.assessmentId || null,
-      invoiceId:    entry.invoiceId || null,
-      entryNo:      entry.entryNo || null,
-      createdBy:    entry.createdBy || null,
-    },
-  });
+    try {
+      return await tx.studentLedger.create({
+        data: {
+          businessId:   Number(entry.businessId),
+          studentId:    Number(entry.studentId),
+          entryDate:    entry.entryDate instanceof Date ? entry.entryDate : new Date(entry.entryDate),
+          seq,
+          type:         entry.type,
+          reference:    entry.reference || null,
+          description:  String(entry.description).slice(0, 255),
+          debit, credit, balance,
+          assessmentId: entry.assessmentId || null,
+          invoiceId:    entry.invoiceId || null,
+          entryNo:      entry.entryNo || null,
+          createdBy:    entry.createdBy || null,
+        },
+      });
+    } catch (err) {
+      if (err.code === 'P2002' && attempt < 4) continue;
+      throw err;
+    }
+  }
 }
 
 /**

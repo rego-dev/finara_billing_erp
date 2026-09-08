@@ -220,6 +220,24 @@ describe('allocateInstallment', () => {
     expect(parts.reduce((s, p) => s + p.amount, 0)).toBe(900);
   });
 
+  test('several one-time fees under a capped down payment split pro rata, not first-come-first-served', () => {
+    // A heavily discounted/subsidised enrollment can cap the down payment
+    // below the combined one-time fees (see buildSchedule). With two such
+    // fees, billing the first in full and starving the second would make the
+    // shortfall depend on array order rather than being shared fairly.
+    const twoOneTime = [
+      { feeTypeId: 1, accountId: 101, description: 'Tuition',      vatCode: 'EXEMPT', amount: 42000, billingBasis: 'ANNUAL' },
+      { feeTypeId: 2, accountId: 102, description: 'Registration', vatCode: 'EXEMPT', amount: 1000,  billingBasis: 'ONE_TIME' },
+      { feeTypeId: 5, accountId: 105, description: 'ID Fee',       vatCode: 'EXEMPT', amount: 500,   billingBasis: 'ONE_TIME' },
+    ];
+    const parts = allocateInstallment({ installmentAmount: 900, lines: twoOneTime, includeOneTime: true });
+
+    expect(parts).toHaveLength(2);
+    expect(parts.find((p) => p.accountId === 102).amount).toBe(600);  // 1000 * (900/1500)
+    expect(parts.find((p) => p.accountId === 105).amount).toBe(300);  // 500  * (900/1500)
+    expect(parts.reduce((s, p) => s + p.amount, 0)).toBe(900);
+  });
+
   test('one-time lines never appear on a regular installment', () => {
     const parts = allocateInstallment({ installmentAmount: 4090, lines });
     expect(parts.find((p) => p.accountId === 102)).toBeUndefined();

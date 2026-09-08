@@ -347,17 +347,23 @@ exports.recordCollection = async (req, res, next) => {
     let remaining = payAmount;
     const applied = [];
 
-    for (const inv of invoices) {
-      if (remaining <= 0.009) break;
-      const balance = round2(Number(inv.totalAmount) - Number(inv.paidAmount));
-      if (balance <= 0.009) continue;
+    // One payment, one transaction — settling several invoices used to open a
+    // separate transaction per invoice, so a failure partway through left the
+    // earlier invoices already marked paid with no way back, and a retry
+    // could double-apply. nextPaymentNo reads through `tx` too, so each
+    // invoice still sees the paymentNo the one before it just wrote, even
+    // though none of it is visible outside this transaction until it commits.
+    await prisma.$transaction(async (tx) => {
+      for (const inv of invoices) {
+        if (remaining <= 0.009) break;
+        const balance = round2(Number(inv.totalAmount) - Number(inv.paidAmount));
+        if (balance <= 0.009) continue;
 
-      const take = round2(Math.min(balance, remaining));
-      const newPaid = round2(Number(inv.paidAmount) + take);
-      const status = round2(Number(inv.totalAmount) - newPaid) <= 0.01 ? 'PAID' : 'PARTIAL';
+        const take = round2(Math.min(balance, remaining));
+        const newPaid = round2(Number(inv.paidAmount) + take);
+        const status = round2(Number(inv.totalAmount) - newPaid) <= 0.01 ? 'PAID' : 'PARTIAL';
+        const paymentNo = await nextPaymentNo(req.businessId, tx);
 
-      const paymentNo = await nextPaymentNo(req.businessId);
-      await prisma.$transaction(async (tx) => {
         await tx.paymentAR.create({
           data: {
             paymentNo, invoiceId: inv.id, paymentDate: payDate,
@@ -380,11 +386,11 @@ exports.recordCollection = async (req, res, next) => {
             data:  { paidAmount: { increment: take } },
           });
         }
-      });
 
-      applied.push({ invoiceNo: inv.invoiceNo, paymentNo, amount: take, invoiceStatus: status });
-      remaining = round2(remaining - take);
-    }
+        applied.push({ invoiceNo: inv.invoiceNo, paymentNo, amount: take, invoiceStatus: status });
+        remaining = round2(remaining - take);
+      }
+    });
 
     // ── Ledger ──────────────────────────────────────────────────────────────
     const appliedTotalForLedger = round2(payAmount - remaining);
@@ -521,9 +527,9 @@ async function advanceEnrollmentStatus(businessId, studentId) {
   ]);
 }
 
-async function nextPaymentNo(businessId) {
+async function nextPaymentNo(businessId, client = prisma) {
   const prefix = `SPR-${businessId}-`;
-  const last = await prisma.paymentAR.findFirst({
+  const last = await client.paymentAR.findFirst({
     where:   { paymentNo: { startsWith: prefix } },
     orderBy: { paymentNo: 'desc' },
     select:  { paymentNo: true },
@@ -570,17 +576,20 @@ exports.applyAdvances = async (req, res, next) => {
     let appliedTotal = 0;
     const touched = [];
 
-    for (const inv of invoices) {
-      if (credit <= 0.009) break;
-      const balance = round2(Number(inv.totalAmount) - Number(inv.paidAmount));
-      if (balance <= 0.009) continue;
+    // One atomic transaction across every invoice this advance touches — same
+    // reasoning as recordCollection: separate per-invoice transactions leave
+    // earlier invoices settled with no way back if a later one fails.
+    await prisma.$transaction(async (tx) => {
+      for (const inv of invoices) {
+        if (credit <= 0.009) break;
+        const balance = round2(Number(inv.totalAmount) - Number(inv.paidAmount));
+        if (balance <= 0.009) continue;
 
-      const take = round2(Math.min(balance, credit));
-      const newPaid = round2(Number(inv.paidAmount) + take);
-      const status = round2(Number(inv.totalAmount) - newPaid) <= 0.01 ? 'PAID' : 'PARTIAL';
-      const paymentNo = await nextPaymentNo(req.businessId);
+        const take = round2(Math.min(balance, credit));
+        const newPaid = round2(Number(inv.paidAmount) + take);
+        const status = round2(Number(inv.totalAmount) - newPaid) <= 0.01 ? 'PAID' : 'PARTIAL';
+        const paymentNo = await nextPaymentNo(req.businessId, tx);
 
-      await prisma.$transaction(async (tx) => {
         await tx.paymentAR.create({
           data: {
             paymentNo, invoiceId: inv.id, paymentDate: new Date(),
@@ -603,12 +612,12 @@ exports.applyAdvances = async (req, res, next) => {
             data:  { paidAmount: { increment: take } },
           });
         }
-      });
 
-      touched.push({ invoiceNo: inv.invoiceNo, amount: take });
-      appliedTotal = round2(appliedTotal + take);
-      credit = round2(credit - take);
-    }
+        touched.push({ invoiceNo: inv.invoiceNo, amount: take });
+        appliedTotal = round2(appliedTotal + take);
+        credit = round2(credit - take);
+      }
+    });
 
     // Draw the applied amount down across the advances, oldest first.
     let toDraw = appliedTotal;
@@ -636,6 +645,19 @@ exports.applyAdvances = async (req, res, next) => {
         userId: req.user?.id || 1,
         businessId: req.businessId,
       });
+
+      // Economically the same event as a cash collection settling an invoice —
+      // the AR clears either way — so it belongs on the statement the same way.
+      await prisma.$transaction((tx) => studentLedger.append(tx, {
+        businessId:  req.businessId,
+        studentId:   student.id,
+        entryDate:   new Date(),
+        type:        'ADVANCE_APPLIED',
+        reference:   `ADV-APPLY-${student.studentNo}`,
+        description: `Advance applied to ${touched.length} invoice${touched.length === 1 ? '' : 's'}`,
+        credit:      appliedTotal,
+        createdBy:   req.user?.id,
+      }));
     }
 
     res.json({

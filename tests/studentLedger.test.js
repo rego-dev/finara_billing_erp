@@ -115,6 +115,54 @@ describe('appending to a student ledger', () => {
     expect(tx.rows[0].description).toHaveLength(255);
   });
 
+  test('retries against a fresh read when a concurrent writer already took the next seq', async () => {
+    // Simulates two cashiers posting for the same student at once: this writer
+    // reads seq 1 first, but by the time it inserts, another transaction has
+    // already committed seq 2 — the unique index on (studentId, seq) rejects it
+    // (P2002), and append must re-read and retry rather than corrupting the
+    // balance or crashing the request.
+    const reads = [{ seq: 1, balance: 4090 }, { seq: 2, balance: 8180 }];
+    let readCall = 0;
+    const created = [];
+    const tx = {
+      studentLedger: {
+        findFirst: jest.fn(async () => reads[readCall++]),
+        create: jest.fn(async ({ data }) => {
+          if (data.seq === 2) {
+            const err = new Error('Unique constraint failed on the fields: (studentId, seq)');
+            err.code = 'P2002';
+            throw err;
+          }
+          const row = { id: created.length + 1, ...data };
+          created.push(row);
+          return row;
+        }),
+      },
+    };
+
+    const row = await ledger.append(tx, charge({ debit: 4090 }));
+
+    expect(tx.studentLedger.findFirst).toHaveBeenCalledTimes(2);
+    expect(row.seq).toBe(3);
+    expect(row.balance).toBe(12270);
+  });
+
+  test('gives up after repeated collisions instead of retrying forever', async () => {
+    const tx = {
+      studentLedger: {
+        findFirst: jest.fn(async () => ({ seq: 1, balance: 4090 })),
+        create: jest.fn(async () => {
+          const err = new Error('Unique constraint failed on the fields: (studentId, seq)');
+          err.code = 'P2002';
+          throw err;
+        }),
+      },
+    };
+
+    await expect(ledger.append(tx, charge({ debit: 4090 }))).rejects.toMatchObject({ code: 'P2002' });
+    expect(tx.studentLedger.create).toHaveBeenCalledTimes(5);
+  });
+
   test('appendMany keeps the order it was given and skips the empty rows', async () => {
     const tx = fakeTx();
     const written = await ledger.appendMany(tx, [

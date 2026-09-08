@@ -198,16 +198,36 @@ function allocateInstallment({ installmentAmount, lines, includeOneTime = false 
 
   // One-time fees are billed at FACE VALUE on the enrolment invoice. A
   // registration fee is a fixed charge, not a share of whatever was paid that
-  // day. Pro-rating it would push part of it onto the tuition account and,
-  // where a VATable line is in the mix, put VAT on a payment that is entirely
-  // exempt.
+  // day. Pro-rating it against the annual lines would push part of it onto
+  // the tuition account and, where a VATable line is in the mix, put VAT on a
+  // payment that is entirely exempt.
+  //
+  // When the down payment itself was capped below the combined one-time fees
+  // (a heavily discounted/subsidised enrollment — see buildSchedule), there is
+  // not enough to give every one-time fee its face value. Split what there is
+  // pro rata across them instead of paying whichever fee comes first in the
+  // array in full and leaving the rest at zero.
   if (includeOneTime) {
-    for (const l of all.filter((x) => x.billingBasis === 'ONE_TIME')) {
-      if (remaining <= 0) break;
-      const take = round2(Math.min(l.amount, remaining));
-      if (take <= 0) continue;
-      parts.push(map(l, take));
-      remaining = round2(remaining - take);
+    const oneTime = all.filter((x) => x.billingBasis === 'ONE_TIME');
+    const oneTimeTotal = round2(oneTime.reduce((s, l) => s + l.amount, 0));
+
+    if (remaining >= oneTimeTotal) {
+      for (const l of oneTime) {
+        if (l.amount <= 0) continue;
+        parts.push(map(l, l.amount));
+        remaining = round2(remaining - l.amount);
+      }
+    } else if (oneTimeTotal > 0) {
+      const spread = oneTime.map((l) => map(l, remaining * (l.amount / oneTimeTotal)));
+      const allocated = round2(spread.reduce((s, p) => s + p.amount, 0));
+      const drift = round2(remaining - allocated);
+      if (drift !== 0) {
+        let biggest = 0;
+        for (let i = 1; i < spread.length; i++) if (spread[i].amount > spread[biggest].amount) biggest = i;
+        spread[biggest].amount = round2(spread[biggest].amount + drift);
+      }
+      parts.push(...spread);
+      remaining = 0;
     }
   }
 
