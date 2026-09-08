@@ -337,6 +337,7 @@ export default function SettingsPage() {
   const [permConfig, setPermConfig] = useState(null); // { MANAGER:[], ACCOUNTANT:[], VIEWER:[] }
   const [permSaving, setPermSaving] = useState(false);
   const [disabledMods,        setDisabledMods]        = useState(null); // string[] of module keys, SUPER_ADMIN only
+  const [adminExempt,         setAdminExempt]         = useState(false); // exempt ADMIN from disabledMods, SUPER_ADMIN only
   const [disabledModsSaving,  setDisabledModsSaving]   = useState(false);
   const [inquiries,        setInquiries]        = useState([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
@@ -473,7 +474,8 @@ export default function SettingsPage() {
   const loadDisabledMods = useCallback(async () => {
     try {
       const r = await permApi.getDisabled();
-      setDisabledMods(r.data);
+      setDisabledMods(r.data.disabled);
+      setAdminExempt(r.data.adminExempt);
     } catch { toast.error('Failed to load module settings'); }
   }, []);
 
@@ -516,9 +518,10 @@ export default function SettingsPage() {
   const handleSaveDisabledMods = async () => {
     setDisabledModsSaving(true);
     try {
-      const r = await permApi.saveDisabled({ disabled: disabledMods });
+      const r = await permApi.saveDisabled({ disabled: disabledMods, adminExempt });
       setDisabledMods(r.data.disabled);
-      setDisabledModules(r.data.disabled); // apply live so nav/guard update without reload
+      setAdminExempt(r.data.adminExempt);
+      setDisabledModules(r.data.disabled, r.data.adminExempt); // apply live so nav/guard update without reload
       toast.success('Module settings saved');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to save module settings');
@@ -1387,8 +1390,9 @@ export default function SettingsPage() {
               <SectionTitle icon={Blocks} color="text-violet-600">Modules</SectionTitle>
               <p className="text-sm text-gray-500">
                 Turn a module off to hide it from the sidebar and block direct navigation to it,
-                for every role — including Admin. Nothing is deleted; data and routes stay intact,
-                and turning it back on restores full access immediately. Dashboard and Settings
+                for every role — including Admin, unless the exemption below is on. Nothing is
+                deleted; data and routes stay intact, and turning it back on restores full access
+                immediately. Dashboard and Settings
                 can't be turned off, so this screen always stays reachable.
               </p>
 
@@ -1406,6 +1410,17 @@ export default function SettingsPage() {
                       />
                     ))}
                   </div>
+                  <div className="border border-gray-200 rounded-xl px-4">
+                    <Toggle
+                      label="Exempt Admin from these restrictions"
+                      value={adminExempt}
+                      onChange={() => setAdminExempt((v) => !v)}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400 -mt-3">
+                    When on, the Admin role sees every module regardless of the toggles above — same
+                    as Super Admin. Off by default, so Admin stays restricted like every other role.
+                  </p>
                   <div className="flex justify-end">
                     <button onClick={handleSaveDisabledMods} disabled={disabledModsSaving} className="btn-primary">
                       {disabledModsSaving ? 'Saving…' : 'Save Module Settings'}
