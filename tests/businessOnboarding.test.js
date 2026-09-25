@@ -1,6 +1,7 @@
 jest.mock('../server/config/database', () => ({
   business:      { create: jest.fn(), update: jest.fn(), delete: jest.fn() },
-  userBusiness:  { findFirst: jest.fn(), create: jest.fn(), deleteMany: jest.fn() },
+  userBusiness:  { findFirst: jest.fn(), create: jest.fn(), createMany: jest.fn(), deleteMany: jest.fn() },
+  user:          { findMany: jest.fn() },
   systemSetting: { upsert: jest.fn(), deleteMany: jest.fn() },
   account:       { deleteMany: jest.fn() },
   feeType:       { deleteMany: jest.fn() },
@@ -82,6 +83,61 @@ describe('businessController.onboard', () => {
     await expect(onboard({ ...ok, companyType: 'SCHOOL' })).rejects.toThrow('boom');
     expect(prisma.business.delete).toHaveBeenCalledWith({ where: { id: 42 } });
     expect(prisma.account.deleteMany).toHaveBeenCalled();
+  });
+});
+
+describe('businessController.create (admin)', () => {
+  const create = (body) => new Promise((resolve, reject) => {
+    ctrl.create({ user: { id: 1, role: 'ADMIN' }, body }, { status: () => ({ json: resolve }) }, reject);
+  });
+  const base = { code: 'zz1', name: 'Acme' };
+
+  beforeEach(() => {
+    prisma.user.findMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+    prisma.userBusiness.createMany.mockResolvedValue({});
+  });
+
+  test('rejects an unknown company type or tax type', async () => {
+    await expect(create({ ...base, companyType: 'HACK' })).rejects.toMatchObject({ statusCode: 400 });
+    await expect(create({ ...base, taxType: 'NOPE' })).rejects.toMatchObject({ statusCode: 400 });
+    expect(prisma.business.create).not.toHaveBeenCalled();
+  });
+
+  test('school: runs school setup, grants all admins', async () => {
+    const biz = await create({ ...base, companyType: 'SCHOOL', taxType: 'NON_VAT' });
+
+    expect(biz).toMatchObject({ code: 'ZZ1', industry: 'School', taxType: 'NON_VAT' });
+    expect(setupSchool).toHaveBeenCalledWith(42, { hideFromOthers: false });
+    expect(prisma.userBusiness.createMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: [{ userId: 1, businessId: 42 }, { userId: 2, businessId: 42 }],
+    }));
+  });
+
+  test('non-school type hides the School module for that business only', async () => {
+    await create({ ...base, companyType: 'TRADING' });
+
+    expect(setupSchool).not.toHaveBeenCalled();
+    expect(prisma.systemSetting.upsert).toHaveBeenCalledWith(expect.objectContaining({
+      create: { businessId: 42, key: 'disabledModules', value: JSON.stringify(['school']) },
+    }));
+  });
+
+  test('without a companyType it behaves as before (no type-specific setup)', async () => {
+    await create(base);
+
+    expect(cloneChartOfAccounts).toHaveBeenCalledWith(1, 42);
+    expect(setupSchool).not.toHaveBeenCalled();
+    expect(prisma.systemSetting.upsert).not.toHaveBeenCalled();
+  });
+
+  test('a failed setup rolls the business back', async () => {
+    setupSchool.mockRejectedValueOnce(new Error('boom'));
+    [prisma.userBusiness.deleteMany, prisma.systemSetting.deleteMany, prisma.feeType.deleteMany,
+      prisma.gradeLevel.deleteMany, prisma.paymentScheme.deleteMany, prisma.account.deleteMany,
+      prisma.business.delete].forEach((f) => f.mockResolvedValue({}));
+
+    await expect(create({ ...base, companyType: 'SCHOOL' })).rejects.toThrow('boom');
+    expect(prisma.business.delete).toHaveBeenCalledWith({ where: { id: 42 } });
   });
 });
 

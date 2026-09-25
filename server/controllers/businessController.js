@@ -49,28 +49,70 @@ exports.get = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// ─── Create ──────────────────────────────────────────────────────
+// ─── Shared by create() and onboard() ─────────────────────────────
+// Type-specific setup on top of the cloned COA. A school gets the school COA,
+// fee types, grade levels and payment schemes; any other type has the School
+// module hidden for THIS business only. Never touches other businesses.
+async function provisionByType(businessId, companyType) {
+  if (companyType === 'SCHOOL') {
+    await setupSchool(businessId, { hideFromOthers: false });
+    requireSchool.clearCache(businessId);
+  } else {
+    await prisma.systemSetting.upsert({
+      where:  { businessId_key: { businessId, key: 'disabledModules' } },
+      update: { value: JSON.stringify(['school']) },
+      create: { businessId, key: 'disabledModules', value: JSON.stringify(['school']) },
+    });
+  }
+}
+
+// Undo a half-built company so a failed setup doesn't leave an orphan behind.
+async function rollbackBusiness(businessId) {
+  const swallow = () => {};
+  await prisma.userBusiness.deleteMany({ where: { businessId } }).catch(swallow);
+  await prisma.systemSetting.deleteMany({ where: { businessId } }).catch(swallow);
+  for (const m of ['feeType', 'gradeLevel', 'paymentScheme']) {
+    await prisma[m].deleteMany({ where: { businessId } }).catch(swallow);
+  }
+  await prisma.account.deleteMany({ where: { businessId, parentId: { not: null } } }).catch(swallow);
+  await prisma.account.deleteMany({ where: { businessId } }).catch(swallow);
+  await prisma.business.delete({ where: { id: businessId } }).catch(swallow);
+}
+
+// ─── Create (ADMIN) ──────────────────────────────────────────────
+// companyType is optional here for backwards compatibility: without it the
+// business is created as before (cloned COA, no type-specific setup).
 exports.create = async (req, res, next) => {
   try {
-    const { code, name, tin, address, phone, email, industry, booksStartDate } = req.body;
+    const { code, name, tin, address, phone, email, companyType, taxType, booksStartDate } = req.body;
     if (!code || !name) throw createError('code and name are required', 400);
+    if (companyType && !COMPANY_TYPES[companyType]) throw createError('Invalid company type', 400);
+    if (taxType && !TAX_TYPES.includes(taxType)) throw createError('Invalid tax type', 400);
 
     const biz = await prisma.business.create({
       data: {
-        code: code.toUpperCase(), name, tin, address, phone, email, industry,
+        code: code.toUpperCase(), name, tin, address, phone, email,
+        industry: companyType ? COMPANY_TYPES[companyType].label : req.body.industry,
+        taxType: taxType || null,
         booksStartDate: booksStartDate ? new Date(booksStartDate) : null,
       },
     });
 
-    // Auto-clone the default COA from business 1 into the new business
-    await cloneChartOfAccounts(1, biz.id);
+    try {
+      // Auto-clone the default COA from business 1 into the new business
+      await cloneChartOfAccounts(1, biz.id);
+      if (companyType) await provisionByType(biz.id, companyType);
 
-    // Grant all ADMIN users access to the new business
-    const admins = await prisma.user.findMany({ where: { role: 'ADMIN' } });
-    await prisma.userBusiness.createMany({
-      data: admins.map((u) => ({ userId: u.id, businessId: biz.id })),
-      skipDuplicates: true,
-    });
+      // Grant all ADMIN users access to the new business
+      const admins = await prisma.user.findMany({ where: { role: 'ADMIN' } });
+      await prisma.userBusiness.createMany({
+        data: admins.map((u) => ({ userId: u.id, businessId: biz.id })),
+        skipDuplicates: true,
+      });
+    } catch (err) {
+      await rollbackBusiness(biz.id);
+      throw err;
+    }
 
     res.status(201).json(biz);
   } catch (err) { next(err); }
@@ -103,30 +145,9 @@ exports.onboard = async (req, res, next) => {
     try {
       await cloneChartOfAccounts(1, biz.id);
       await prisma.userBusiness.create({ data: { userId: req.user.id, businessId: biz.id } });
-
-      if (companyType === 'SCHOOL') {
-        // School COA, fee types, grade levels, payment schemes. Never touch
-        // other businesses' module settings from a self-service signup.
-        await setupSchool(biz.id, { hideFromOthers: false });
-        requireSchool.clearCache(biz.id);
-      } else {
-        // Not a school: hide the School module for this business only.
-        await prisma.systemSetting.upsert({
-          where:  { businessId_key: { businessId: biz.id, key: 'disabledModules' } },
-          update: { value: JSON.stringify(['school']) },
-          create: { businessId: biz.id, key: 'disabledModules', value: JSON.stringify(['school']) },
-        });
-      }
+      await provisionByType(biz.id, companyType);
     } catch (err) {
-      // Don't leave a half-built company behind.
-      await prisma.userBusiness.deleteMany({ where: { businessId: biz.id } }).catch(() => {});
-      await prisma.systemSetting.deleteMany({ where: { businessId: biz.id } }).catch(() => {});
-      for (const m of ['feeType', 'gradeLevel', 'paymentScheme']) {
-        await prisma[m].deleteMany({ where: { businessId: biz.id } }).catch(() => {});
-      }
-      await prisma.account.deleteMany({ where: { businessId: biz.id, parentId: { not: null } } }).catch(() => {});
-      await prisma.account.deleteMany({ where: { businessId: biz.id } }).catch(() => {});
-      await prisma.business.delete({ where: { id: biz.id } }).catch(() => {});
+      await rollbackBusiness(biz.id);
       throw err;
     }
 
