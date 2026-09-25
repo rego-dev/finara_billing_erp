@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { auth as authApi } from '@/lib/api';
 import { setSession } from '@/lib/auth';
 import { COMPANY_TYPES, setPendingCompanyType } from '@/lib/companyTypes';
+import AuthCarousel from '@/components/auth/AuthCarousel';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -33,8 +34,18 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6"
+    <div className="min-h-screen flex"
       style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%)' }}>
+
+      {/* Left: what Finara solves (desktop only) */}
+      <div className="hidden lg:flex flex-col justify-between w-[48%] max-w-3xl p-12">
+        <img src="/finara-logo-white.svg" alt="Finara" className="h-9 w-auto self-start" />
+        <AuthCarousel />
+        <p className="text-blue-400 text-xs">© {new Date().getFullYear()} Finara · PFRS · BIR · SSS · PhilHealth · Pag-IBIG</p>
+      </div>
+
+      {/* Right: the form */}
+      <div className="flex-1 flex items-center justify-center p-6">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8">
         <h1 className="text-xl font-black text-gray-900">Create your Finara account</h1>
         <p className="text-xs text-gray-400 mt-1 mb-6">Tell us what kind of company you run — you&apos;ll add its details in the next step.</p>
@@ -82,6 +93,7 @@ export default function RegisterPage() {
         <p className="text-xs text-gray-500 text-center mt-6">
           Already have an account? <Link href="/login" className="text-blue-600 font-medium">Sign in</Link>
         </p>
+      </div>
       </div>
     </div>
   );
