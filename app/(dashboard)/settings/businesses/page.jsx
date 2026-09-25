@@ -32,7 +32,7 @@ export default function BusinessesPage() {
   const [editBiz,    setEditBiz]    = useState(null);   // business object or 'new'
   const [manageId,   setManageId]   = useState(null);   // businessId for user mgmt
   const [bizUsers,   setBizUsers]   = useState([]);     // users in manageId business
-  const [form,       setForm]       = useState({ code:'', name:'', tin:'', address:'', phone:'', email:'', booksStartDate:'' });
+  const [form,       setForm]       = useState({ code:'', name:'', tin:'', address:'', phone:'', email:'', taxType:'', booksStartDate:'' });
   const [resetBiz,    setResetBiz]    = useState(null);   // business object mid-confirm
   const [resetPhrase, setResetPhrase] = useState('');
   const [resetting,   setResetting]   = useState(false);
@@ -56,12 +56,12 @@ export default function BusinessesPage() {
 
   // ── Business create/update ──────────────────────────────────
   function openCreate() {
-    setForm({ code:'', name:'', tin:'', address:'', phone:'', email:'', booksStartDate:'' });
+    setForm({ code:'', name:'', tin:'', address:'', phone:'', email:'', taxType:'', booksStartDate:'' });
     setEditBiz('new');
   }
 
   function openEdit(biz) {
-    setForm({ code: biz.code, name: biz.name, tin: biz.tin||'', address: biz.address||'', phone: biz.phone||'', email: biz.email||'', booksStartDate: biz.booksStartDate?.split('T')[0] || '' });
+    setForm({ code: biz.code, name: biz.name, tin: biz.tin||'', address: biz.address||'', phone: biz.phone||'', email: biz.email||'', taxType: biz.taxType||'', booksStartDate: biz.booksStartDate?.split('T')[0] || '' });
     setEditBiz(biz);
   }
 
@@ -231,6 +231,15 @@ export default function BusinessesPage() {
               <div>
                 <label className="label">Address</label>
                 <input className="input" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Tax Registration</label>
+                <select className="input" value={form.taxType}
+                  onChange={e => setForm(f => ({ ...f, taxType: e.target.value }))}>
+                  <option value="">Not specified</option>
+                  <option value="VAT">VAT-registered</option>
+                  <option value="NON_VAT">Non-VAT (percentage tax)</option>
+                </select>
               </div>
               <div>
                 <label className="label">Books Start Date</label>

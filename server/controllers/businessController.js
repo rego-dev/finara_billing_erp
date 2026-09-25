@@ -138,12 +138,17 @@ exports.onboard = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const { name, tin, address, phone, email, industry, isActive, booksStartDate } = req.body;
+    const { name, tin, address, phone, email, industry, isActive, taxType, booksStartDate } = req.body;
+    if (taxType && !TAX_TYPES.includes(taxType)) throw createError('Invalid tax type', 400);
     const biz = await prisma.business.update({
       where: { id },
       data: {
         name, tin, address, phone, email, industry, isActive,
-        booksStartDate: booksStartDate ? new Date(booksStartDate) : null,
+        // '' clears it; undefined (field not sent) leaves it alone.
+        taxType: taxType === '' ? null : taxType,
+        // Only touch the cutover date when the client actually sent it, so a
+        // partial PUT can't silently wipe it. '' / null clears it on purpose.
+        ...(booksStartDate !== undefined && { booksStartDate: booksStartDate ? new Date(booksStartDate) : null }),
       },
     });
 
