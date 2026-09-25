@@ -38,7 +38,7 @@ export default function RegisterPage() {
       style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%)' }}>
 
       {/* Left: what Finara solves (desktop only) */}
-      <div className="hidden lg:flex flex-col justify-between w-[48%] max-w-3xl p-12">
+      <div className="hidden lg:flex flex-col justify-between w-[48%] max-w-3xl px-12 py-8">
         <img src="/finara-logo-white.svg" alt="Finara" className="h-9 w-auto self-start" />
         <AuthCarousel />
         <p className="text-blue-400 text-xs">© {new Date().getFullYear()} Finara · PFRS · BIR · SSS · PhilHealth · Pag-IBIG</p>
