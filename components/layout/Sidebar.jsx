@@ -7,11 +7,11 @@ import {
   Package, Landmark, Wallet,
   ShoppingCart, Banknote, BarChart3, Repeat,
   PanelLeftClose, PanelLeftOpen, HandCoins, Scale,
-  GraduationCap,
+  GraduationCap, Blocks,
 } from 'lucide-react';
 import PesoReceipt from '@/components/icons/PesoReceipt';
 import { clearSession, getUser } from '@/lib/auth';
-import { canAccess } from '@/lib/permissions';
+import { canAccess, isNavVisible } from '@/lib/permissions';
 import { useRouter } from 'next/navigation';
 import { auth as authApi } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -225,7 +225,15 @@ export default function Sidebar({ collapsed = false, onToggle, mobileOpen = fals
   const router = useRouter();
   // Read user from localStorage only after mount so the first client render
   // matches the server (which has no localStorage) — avoids hydration mismatch.
+  const pathname = usePathname();
   const [user, setUser] = useState(null);
+  const [, bumpModules] = useState(0);
+  // Re-render when the Modules page (or the layout's initial load) changes the list.
+  useEffect(() => {
+    const h = () => bumpModules((n) => n + 1);
+    window.addEventListener('finara:modules-changed', h);
+    return () => window.removeEventListener('finara:modules-changed', h);
+  }, []);
   useEffect(() => { setUser(getUser()); }, []);
 
   const handleLogout = async () => {
@@ -264,7 +272,7 @@ export default function Sidebar({ collapsed = false, onToggle, mobileOpen = fals
       <nav className="flex-1 p-3 overflow-y-auto">
         {NAV.map((group, gi) => {
           const items = group.items.filter((item) =>
-            !user || canAccess(item.href || item.children?.[0]?.href, user.role));
+            !user || isNavVisible(item.href || item.children?.[0]?.href, user.role));
           if (items.length === 0) return null;
           return (
             <div key={group.section || `g${gi}`} className="mb-1">
@@ -292,6 +300,9 @@ export default function Sidebar({ collapsed = false, onToggle, mobileOpen = fals
                 <Link href="/settings" title="Settings" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Settings className="w-5 h-5" /></Link>
                 <Link href="/settings/businesses" title="Businesses" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Building2 className="w-5 h-5" /></Link>
                 <Link href="/settings/opening-balances" title="Opening Balances" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Scale className="w-5 h-5" /></Link>
+                {user?.role === 'SUPER_ADMIN' && (
+                  <Link href="/modules" title="Modules" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Blocks className="w-5 h-5" /></Link>
+                )}
               </>
             )}
             <button onClick={handleLogout} title={`Logout (${user?.email || ''})`} className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800"><LogOut className="w-5 h-5" /></button>
@@ -312,6 +323,12 @@ export default function Sidebar({ collapsed = false, onToggle, mobileOpen = fals
                   <Scale className="w-4 h-4" />
                   Opening Balances
                 </Link>
+                {user?.role === 'SUPER_ADMIN' && (
+                  <Link href="/modules" className={pathname === '/modules' ? 'sidebar-link-active' : 'sidebar-link-inactive'}>
+                    <Blocks className="w-4 h-4" />
+                    Modules
+                  </Link>
+                )}
               </>
             )}
             <div className="flex items-center gap-3 px-3 py-2">
