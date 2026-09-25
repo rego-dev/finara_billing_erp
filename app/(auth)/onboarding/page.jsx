@@ -4,13 +4,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { businesses as bizApi } from '@/lib/api';
 import { isAuthenticated, clearSession } from '@/lib/auth';
-
-const TYPES = [
-  { key: 'SCHOOL',   label: 'School',            hint: 'Tuition and fee billing, students, grade levels, payment schemes.' },
-  { key: 'SERVICES', label: 'Services / Agency', hint: 'Bill clients for services; sales, purchases, and payroll.' },
-  { key: 'TRADING',  label: 'Retail / Trading',  hint: 'Buy and sell goods; inventory, sales, and purchases.' },
-  { key: 'OTHER',    label: 'Other',             hint: 'Start with the standard chart of accounts and set up your own way.' },
-];
+import { COMPANY_TYPES, takePendingCompanyType } from '@/lib/companyTypes';
 
 const TAX_TYPES = [
   { key: 'VAT',     label: 'VAT-registered', hint: '12% VAT on sales; input VAT is claimable.' },
@@ -28,7 +22,13 @@ export default function OnboardingPage() {
     if (!isAuthenticated()) { router.replace('/login'); return; }
     // Someone who already has a company has nothing to set up here.
     bizApi.list()
-      .then(({ data }) => { if (data?.length) router.replace('/dashboard'); else setReady(true); })
+      .then(({ data }) => {
+        if (data?.length) { router.replace('/dashboard'); return; }
+        // Pre-select what they chose on the signup form; they can still change it.
+        const chosen = takePendingCompanyType();
+        if (chosen) setForm((f) => ({ ...f, companyType: chosen }));
+        setReady(true);
+      })
       .catch(() => setReady(true));
   }, [router]);
 
@@ -80,7 +80,7 @@ export default function OnboardingPage() {
           <div>
             <label className="label">What type of company is this? *</label>
             <div className="grid grid-cols-2 gap-2">
-              {TYPES.map((t) => (
+              {COMPANY_TYPES.map((t) => (
                 <label key={t.key}
                   className={`border rounded-lg p-3 cursor-pointer text-sm ${form.companyType === t.key ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
                   <input type="radio" name="companyType" className="sr-only" required

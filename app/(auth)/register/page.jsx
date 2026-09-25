@@ -5,10 +5,11 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { auth as authApi } from '@/lib/api';
 import { setSession } from '@/lib/auth';
+import { COMPANY_TYPES, setPendingCompanyType } from '@/lib/companyTypes';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', companyType: '' });
   const [loading, setLoading] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -16,10 +17,12 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await authApi.register(form);
+      const { companyType, ...account } = form; // the server only needs the account here
+      const { data } = await authApi.register(account);
+      setPendingCompanyType(companyType);
       setSession(data);
       localStorage.removeItem('activeBusinessId');
-      toast.success('Account created! Now set up your company.');
+      toast.success('Account created! Now add your company details.');
       router.push('/onboarding');
     } catch (err) {
       const errors = err.response?.data?.errors;
@@ -32,9 +35,9 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6"
       style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%)' }}>
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8">
         <h1 className="text-xl font-black text-gray-900">Create your Finara account</h1>
-        <p className="text-xs text-gray-400 mt-1 mb-6">You&apos;ll set up your company in the next step.</p>
+        <p className="text-xs text-gray-400 mt-1 mb-6">Tell us what kind of company you run — you&apos;ll add its details in the next step.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -56,6 +59,20 @@ export default function RegisterPage() {
             <input type="password" className="input" required minLength={8} autoComplete="new-password"
               value={form.password} onChange={set('password')} />
             <p className="text-xs text-gray-400 mt-1">At least 8 characters with uppercase, lowercase, and a number.</p>
+          </div>
+          <div>
+            <label className="label">Company type *</label>
+            <div className="grid grid-cols-2 gap-2">
+              {COMPANY_TYPES.map((t) => (
+                <label key={t.key}
+                  className={`border rounded-lg p-3 cursor-pointer text-sm ${form.companyType === t.key ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                  <input type="radio" name="companyType" className="sr-only" required
+                    checked={form.companyType === t.key} onChange={() => setForm((f) => ({ ...f, companyType: t.key }))} />
+                  <span className="font-semibold text-gray-900 block">{t.label}</span>
+                  <span className="text-xs text-gray-500">{t.hint}</span>
+                </label>
+              ))}
+            </div>
           </div>
           <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
             {loading ? 'Creating account…' : 'Create account'}
