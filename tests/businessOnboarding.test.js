@@ -3,7 +3,7 @@ jest.mock('../server/config/database', () => ({
   userBusiness:  { findFirst: jest.fn(), create: jest.fn(), createMany: jest.fn(), deleteMany: jest.fn() },
   user:          { findMany: jest.fn() },
   systemSetting: { upsert: jest.fn(), deleteMany: jest.fn() },
-  account:       { deleteMany: jest.fn() },
+  account:       { deleteMany: jest.fn(), updateMany: jest.fn() },
   feeType:       { deleteMany: jest.fn() },
   gradeLevel:    { deleteMany: jest.fn() },
   paymentScheme: { deleteMany: jest.fn() },
@@ -64,6 +64,23 @@ describe('businessController.onboard', () => {
     expect(prisma.systemSetting.upsert).toHaveBeenCalledWith(expect.objectContaining({
       create: { businessId: 42, key: 'disabledModules', value: JSON.stringify(['school']) },
     }));
+  });
+
+  test('trading: deactivates the agency-only accounts for that business only', async () => {
+    await onboard({ ...ok, companyType: 'TRADING' });
+
+    const arg = prisma.account.updateMany.mock.calls[0][0];
+    expect(arg.where.businessId).toBe(42);
+    expect(arg.data).toEqual({ isActive: false });
+    expect(arg.where.accountCode.in).toEqual(expect.arrayContaining(['4100', '5020', '1220']));
+    // the retail/trading accounts the inventory module posts to must survive
+    expect(arg.where.accountCode.in).not.toEqual(expect.arrayContaining(['1210']));
+    ['1210', '4210', '4250', '5010', '5011', '2010'].forEach((c) => expect(arg.where.accountCode.in).not.toContain(c));
+  });
+
+  test('other types do not retire any accounts', async () => {
+    await onboard(ok);
+    expect(prisma.account.updateMany).not.toHaveBeenCalled();
   });
 
   test('school: runs school setup without touching other tenants', async () => {

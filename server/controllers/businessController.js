@@ -3,7 +3,7 @@ const { createError } = require('../middleware/errorHandler');
 const { clearBusinessCache } = require('../utils/glPost');
 const { cloneChartOfAccounts } = require('../utils/cloneChartOfAccounts');
 const { resetDemoBusiness } = require('../../prisma/seedDemo');
-const { COMPANY_TYPES, TAX_TYPES } = require('../utils/companyTypes');
+const { COMPANY_TYPES, TAX_TYPES, TRADING_RETIRE_CODES } = require('../utils/companyTypes');
 const { setupSchool } = require('../../prisma/seedSchool');
 const requireSchool = require('../middleware/requireSchool');
 
@@ -52,8 +52,15 @@ exports.get = async (req, res, next) => {
 // ─── Shared by create() and onboard() ─────────────────────────────
 // Type-specific setup on top of the cloned COA. A school gets the school COA,
 // fee types, grade levels and payment schemes; any other type has the School
-// module hidden for THIS business only. Never touches other businesses.
+// module hidden for THIS business only; TRADING also drops the agency-only
+// accounts. Never touches other businesses.
 async function provisionByType(businessId, companyType) {
+  if (companyType === 'TRADING') {
+    await prisma.account.updateMany({
+      where: { businessId, accountCode: { in: TRADING_RETIRE_CODES } },
+      data:  { isActive: false },
+    });
+  }
   if (companyType === 'SCHOOL') {
     await setupSchool(businessId, { hideFromOthers: false });
     requireSchool.clearCache(businessId);
