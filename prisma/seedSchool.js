@@ -99,15 +99,16 @@ function parseBusinessId() {
   return id;
 }
 
-async function main() {
-  const businessId = parseBusinessId();
-
+/**
+ * Set a business up as a school. Used by the CLI below and by self-service
+ * onboarding. `hideFromOthers` (CLI default) also switches the School module
+ * off on every non-school business - onboarding passes false, because a new
+ * signup must never touch another tenant's settings.
+ */
+async function setupSchool(businessId, { hideFromOthers = true } = {}) {
   const business = await prisma.business.findUnique({ where: { id: businessId } });
-  if (!business) {
-    console.error(`No business with id ${businessId}.`);
-    process.exit(1);
-  }
-  console.log(`\nSeeding school setup for [${business.code}] ${business.name}\n`);
+  if (!business) throw new Error('No business with id ' + businessId + '.');
+  console.log('\nSeeding school setup for [' + business.code + '] ' + business.name + '\n');
 
   // ── Accounts ─────────────────────────────────────────────────────────────
   let created = 0, updated = 0;
@@ -197,6 +198,7 @@ async function main() {
   console.log('  Module flag: school.enabled = true');
 
   // ── Hide the module from the businesses that are not schools ─────────────
+  if (hideFromOthers) {
   // The existing per-business module toggle (Settings → Modules) already does
   // exactly this, so we reuse it rather than inventing a second mechanism.
   // A business that has its own fee types is treated as a school and left
@@ -223,6 +225,7 @@ async function main() {
     hidden.push(o.code);
   }
   console.log(`  Module hidden from non-school businesses: ${hidden.length ? hidden.join(', ') : 'none needed'}`);
+  }
 
   // ── Cutover warning ──────────────────────────────────────────────────────
   // glPost silently skips anything dated before booksStartDate, so a school
@@ -237,6 +240,11 @@ async function main() {
   console.log('\nDone.\n');
 }
 
-main()
-  .catch((e) => { console.error(e); process.exit(1); })
-  .finally(() => prisma.$disconnect());
+module.exports = { setupSchool };
+
+// CLI entry - only when run directly, so requiring this file has no side effects.
+if (require.main === module) {
+  setupSchool(parseBusinessId())
+    .catch((e) => { console.error(e); process.exit(1); })
+    .finally(() => prisma.$disconnect());
+}

@@ -3,6 +3,9 @@ const { createError } = require('../middleware/errorHandler');
 const { clearBusinessCache } = require('../utils/glPost');
 const { cloneChartOfAccounts } = require('../utils/cloneChartOfAccounts');
 const { resetDemoBusiness } = require('../../prisma/seedDemo');
+const { COMPANY_TYPES, TAX_TYPES } = require('../utils/companyTypes');
+const { setupSchool } = require('../../prisma/seedSchool');
+const requireSchool = require('../middleware/requireSchool');
 
 // ─── List all businesses the current user can access ─────────────
 exports.list = async (req, res, next) => {
@@ -68,6 +71,64 @@ exports.create = async (req, res, next) => {
       data: admins.map((u) => ({ userId: u.id, businessId: biz.id })),
       skipDuplicates: true,
     });
+
+    res.status(201).json(biz);
+  } catch (err) { next(err); }
+};
+
+// ─── Self-service company creation (first business for a new account) ───
+// Only for a user who has no business yet. Creates the company, clones the
+// default COA, and grants ONLY this user access — the company is theirs alone.
+exports.onboard = async (req, res, next) => {
+  try {
+    const { name, tin, address, phone, companyType, taxType, booksStartDate } = req.body;
+    if (!name || !String(name).trim()) throw createError('Company name is required', 400);
+    if (!COMPANY_TYPES[companyType]) throw createError('Choose a company type', 400);
+    if (!TAX_TYPES.includes(taxType)) throw createError('Choose a tax type (VAT or Non-VAT)', 400);
+
+    const already = await prisma.userBusiness.findFirst({ where: { userId: req.user.id }, select: { id: true } });
+    if (already) throw createError('You already have a company', 409);
+
+    const code = `BIZ-${require('crypto').randomBytes(3).toString('hex').toUpperCase()}`;
+    const biz = await prisma.business.create({
+      data: {
+        code, name: String(name).trim(), tin, address, phone,
+        industry: COMPANY_TYPES[companyType].label,
+        taxType,
+        email: req.user.email,
+        booksStartDate: booksStartDate ? new Date(booksStartDate) : null,
+      },
+    });
+
+    try {
+      await cloneChartOfAccounts(1, biz.id);
+      await prisma.userBusiness.create({ data: { userId: req.user.id, businessId: biz.id } });
+
+      if (companyType === 'SCHOOL') {
+        // School COA, fee types, grade levels, payment schemes. Never touch
+        // other businesses' module settings from a self-service signup.
+        await setupSchool(biz.id, { hideFromOthers: false });
+        requireSchool.clearCache(biz.id);
+      } else {
+        // Not a school: hide the School module for this business only.
+        await prisma.systemSetting.upsert({
+          where:  { businessId_key: { businessId: biz.id, key: 'disabledModules' } },
+          update: { value: JSON.stringify(['school']) },
+          create: { businessId: biz.id, key: 'disabledModules', value: JSON.stringify(['school']) },
+        });
+      }
+    } catch (err) {
+      // Don't leave a half-built company behind.
+      await prisma.userBusiness.deleteMany({ where: { businessId: biz.id } }).catch(() => {});
+      await prisma.systemSetting.deleteMany({ where: { businessId: biz.id } }).catch(() => {});
+      for (const m of ['feeType', 'gradeLevel', 'paymentScheme']) {
+        await prisma[m].deleteMany({ where: { businessId: biz.id } }).catch(() => {});
+      }
+      await prisma.account.deleteMany({ where: { businessId: biz.id, parentId: { not: null } } }).catch(() => {});
+      await prisma.account.deleteMany({ where: { businessId: biz.id } }).catch(() => {});
+      await prisma.business.delete({ where: { id: biz.id } }).catch(() => {});
+      throw err;
+    }
 
     res.status(201).json(biz);
   } catch (err) { next(err); }
