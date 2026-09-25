@@ -9,7 +9,7 @@ import {
   ShoppingCart, FileText, CheckCircle, Clock, Circle, CheckCircle2,
 } from 'lucide-react';
 import PesoSign from '@/components/icons/PesoSign';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const StatCard = ({ label, value, sub, icon: Icon, color, trend }) => (
   <div className="stat-card">
@@ -149,7 +149,7 @@ export default function DashboardPage() {
                 <Tooltip formatter={(v) => formatCurrency(v)} />
                 <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
                   {chartData.map((entry, i) => (
-                    <rect key={i} fill={entry.fill} />
+                    <Cell key={i} fill={entry.fill} />
                   ))}
                 </Bar>
               </BarChart>
