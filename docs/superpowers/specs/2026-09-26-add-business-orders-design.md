@@ -20,7 +20,7 @@ Renewal/expiry locking is **Part 2** (out of scope here); the schema carries `pa
 ## Backend
 User (authenticated): `GET /orders/plans`, `POST /orders`, `POST /orders/:id/proof`, `GET /orders`, `POST /orders/:id/cancel`.
 Super admin: `GET|PUT /admin/plan-prices`, `PUT /admin/payment-instructions`, `GET /admin/orders`, `POST /admin/orders/:id/approve|reject`.
-- Approve extracts the creation steps of `businessController.onboard` into a shared helper (create business, `cloneChartOfAccounts`, `provisionByType`, `UserBusiness` for the orderer), inside a transaction with rollback on failure. Sets `paidUntil` (+1 month / +1 year), records audit.
+- Approve extracts the creation steps of `businessController.onboard` into a shared helper (create business, `cloneChartOfAccounts`, `provisionByType`, `UserBusiness` for the orderer), via an atomic status claim (provisioning uses the global prisma client, so no DB transaction); on failure the status is reverted and the half-built business rolled back. Sets `paidUntil` (+1 month / +1 year), records audit.
 - Approve is idempotent: status is re-checked inside the transaction; only `PROOF_SUBMITTED` can be approved.
 - Users only read/modify their own orders (scoped by `userId`). Price is read from the snapshot on the order, never recomputed.
 
