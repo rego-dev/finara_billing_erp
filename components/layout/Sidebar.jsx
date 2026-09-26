@@ -295,6 +295,7 @@ export default function Sidebar({ collapsed = false, onToggle, mobileOpen = fals
       <div className="border-t border-gray-200 p-3 space-y-1 dark:border-gray-800">
         {collapsed ? (
           <div className="flex flex-col items-center gap-1">
+            <Link href="/my-businesses" title="My Businesses" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Building2 className="w-5 h-5" /></Link>
             {(!user || canAccess('/settings', user.role)) && (
               <>
                 <Link href="/settings" title="Settings" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Settings className="w-5 h-5" /></Link>
@@ -309,6 +310,10 @@ export default function Sidebar({ collapsed = false, onToggle, mobileOpen = fals
           </div>
         ) : (
           <>
+            <Link href="/my-businesses" className={pathname === '/my-businesses' ? 'sidebar-link-active' : 'sidebar-link-inactive'}>
+              <Building2 className="w-4 h-4" />
+              My Businesses
+            </Link>
             {(!user || canAccess('/settings', user.role)) && (
               <>
                 <Link href="/settings" className="sidebar-link-inactive">

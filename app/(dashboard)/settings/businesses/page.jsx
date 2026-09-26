@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, Pencil, Users, Check, X, Building2, Trash2, RotateCcw, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { businesses as bizApi, settings as settingsApi } from '@/lib/api';
@@ -39,6 +40,7 @@ export default function BusinessesPage() {
 
   const me = getUser();
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(me?.role);
+  const router = useRouter();
 
   async function load() {
     try {
@@ -52,7 +54,12 @@ export default function BusinessesPage() {
     finally  { setLoading(false); }
   }
 
-  useEffect(() => { load(); }, []);
+  // Non-admins have their own page; don't fire the admin-only calls at all.
+  useEffect(() => {
+    if (!isAdmin) { router.replace('/my-businesses'); return; }
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Business create/update ──────────────────────────────────
   function openCreate() {
