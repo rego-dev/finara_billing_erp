@@ -3,9 +3,8 @@ const { createError } = require('../middleware/errorHandler');
 const { clearBusinessCache } = require('../utils/glPost');
 const { cloneChartOfAccounts } = require('../utils/cloneChartOfAccounts');
 const { resetDemoBusiness } = require('../../prisma/seedDemo');
-const { COMPANY_TYPES, TAX_TYPES, TRADING_RETIRE_CODES } = require('../utils/companyTypes');
-const { setupSchool } = require('../../prisma/seedSchool');
-const requireSchool = require('../middleware/requireSchool');
+const { COMPANY_TYPES, TAX_TYPES } = require('../utils/companyTypes');
+const { provisionByType, rollbackBusiness, createProvisionedBusiness } = require('../utils/provisionBusiness');
 
 // ─── List all businesses the current user can access ─────────────
 exports.list = async (req, res, next) => {
@@ -49,43 +48,7 @@ exports.get = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// ─── Shared by create() and onboard() ─────────────────────────────
-// Type-specific setup on top of the cloned COA. A school gets the school COA,
-// fee types, grade levels and payment schemes; any other type has the School
-// module hidden for THIS business only; TRADING also drops the agency-only
-// accounts. Never touches other businesses.
-async function provisionByType(businessId, companyType) {
-  if (companyType === 'TRADING') {
-    await prisma.account.updateMany({
-      where: { businessId, accountCode: { in: TRADING_RETIRE_CODES } },
-      data:  { isActive: false },
-    });
-  }
-  if (companyType === 'SCHOOL') {
-    await setupSchool(businessId, { hideFromOthers: false });
-    requireSchool.clearCache(businessId);
-  } else {
-    await prisma.systemSetting.upsert({
-      where:  { businessId_key: { businessId, key: 'disabledModules' } },
-      update: { value: JSON.stringify(['school']) },
-      create: { businessId, key: 'disabledModules', value: JSON.stringify(['school']) },
-    });
-  }
-}
-
-// Undo a half-built company so a failed setup doesn't leave an orphan behind.
-async function rollbackBusiness(businessId) {
-  const swallow = () => {};
-  await prisma.userBusiness.deleteMany({ where: { businessId } }).catch(swallow);
-  await prisma.systemSetting.deleteMany({ where: { businessId } }).catch(swallow);
-  for (const m of ['feeType', 'gradeLevel', 'paymentScheme']) {
-    await prisma[m].deleteMany({ where: { businessId } }).catch(swallow);
-  }
-  await prisma.account.deleteMany({ where: { businessId, parentId: { not: null } } }).catch(swallow);
-  await prisma.account.deleteMany({ where: { businessId } }).catch(swallow);
-  await prisma.business.delete({ where: { id: businessId } }).catch(swallow);
-}
-
+// ─── Shared by create() and onboard(): see ../utils/provisionBusiness ───
 // ─── Create (ADMIN) ──────────────────────────────────────────────
 // companyType is optional here for backwards compatibility: without it the
 // business is created as before (cloned COA, no type-specific setup).
@@ -138,26 +101,10 @@ exports.onboard = async (req, res, next) => {
     const already = await prisma.userBusiness.findFirst({ where: { userId: req.user.id }, select: { id: true } });
     if (already) throw createError('You already have a company', 409);
 
-    const code = `BIZ-${require('crypto').randomBytes(3).toString('hex').toUpperCase()}`;
-    const biz = await prisma.business.create({
-      data: {
-        code, name: String(name).trim(), tin, address, phone,
-        industry: COMPANY_TYPES[companyType].label,
-        taxType,
-        email: req.user.email,
-        booksStartDate: booksStartDate ? new Date(booksStartDate) : null,
-      },
+    const biz = await createProvisionedBusiness({
+      name, tin, address, phone, email: req.user.email,
+      companyType, taxType, booksStartDate, ownerUserId: req.user.id,
     });
-
-    try {
-      await cloneChartOfAccounts(1, biz.id);
-      await prisma.userBusiness.create({ data: { userId: req.user.id, businessId: biz.id } });
-      await provisionByType(biz.id, companyType);
-    } catch (err) {
-      await rollbackBusiness(biz.id);
-      throw err;
-    }
-
     res.status(201).json(biz);
   } catch (err) { next(err); }
 };
