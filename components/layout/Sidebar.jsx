@@ -7,7 +7,7 @@ import {
   Package, Landmark, Wallet,
   ShoppingCart, Banknote, BarChart3, Repeat,
   PanelLeftClose, PanelLeftOpen, HandCoins, Scale,
-  GraduationCap, Blocks,
+  GraduationCap, Blocks, Tags, ClipboardCheck,
 } from 'lucide-react';
 import PesoReceipt from '@/components/icons/PesoReceipt';
 import { clearSession, getUser } from '@/lib/auth';
@@ -302,7 +302,11 @@ export default function Sidebar({ collapsed = false, onToggle, mobileOpen = fals
                 <Link href="/settings/businesses" title="Businesses" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Building2 className="w-5 h-5" /></Link>
                 <Link href="/settings/opening-balances" title="Opening Balances" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Scale className="w-5 h-5" /></Link>
                 {user?.role === 'SUPER_ADMIN' && (
-                  <Link href="/modules" title="Modules" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Blocks className="w-5 h-5" /></Link>
+                  <>
+                    <Link href="/modules" title="Modules" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Blocks className="w-5 h-5" /></Link>
+                    <Link href="/admin/plans" title="Plans & Payment" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><Tags className="w-5 h-5" /></Link>
+                    <Link href="/admin/orders" title="Business Orders" className="flex items-center justify-center h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"><ClipboardCheck className="w-5 h-5" /></Link>
+                  </>
                 )}
               </>
             )}
@@ -329,10 +333,20 @@ export default function Sidebar({ collapsed = false, onToggle, mobileOpen = fals
                   Opening Balances
                 </Link>
                 {user?.role === 'SUPER_ADMIN' && (
-                  <Link href="/modules" className={pathname === '/modules' ? 'sidebar-link-active' : 'sidebar-link-inactive'}>
-                    <Blocks className="w-4 h-4" />
-                    Modules
-                  </Link>
+                  <>
+                    <Link href="/modules" className={pathname === '/modules' ? 'sidebar-link-active' : 'sidebar-link-inactive'}>
+                      <Blocks className="w-4 h-4" />
+                      Modules
+                    </Link>
+                    <Link href="/admin/plans" className={pathname === '/admin/plans' ? 'sidebar-link-active' : 'sidebar-link-inactive'}>
+                      <Tags className="w-4 h-4" />
+                      Plans &amp; Payment
+                    </Link>
+                    <Link href="/admin/orders" className={pathname === '/admin/orders' ? 'sidebar-link-active' : 'sidebar-link-inactive'}>
+                      <ClipboardCheck className="w-4 h-4" />
+                      Business Orders
+                    </Link>
+                  </>
                 )}
               </>
             )}
