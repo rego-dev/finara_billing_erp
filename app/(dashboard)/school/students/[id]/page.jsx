@@ -178,21 +178,29 @@ export default function StudentDetailPage() {
                     <th className="py-2">Assessment</th><th className="py-2">School Year</th>
                     <th className="py-2">Grade</th><th className="py-2">Plan</th>
                     <th className="py-2 text-right">Net</th><th className="py-2 text-right">Paid</th>
+                    <th className="py-2 text-center">Installments</th>
                     <th className="py-2">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y dark:divide-gray-700">
-                  {assessments.map((a) => (
-                    <tr key={a.id}>
-                      <td className="py-2.5 font-mono text-xs">{a.assessmentNo}</td>
-                      <td className="py-2.5">{a.enrollment.schoolYear.code}</td>
-                      <td className="py-2.5">{a.enrollment.gradeLevel.name}</td>
-                      <td className="py-2.5">{a.enrollment.paymentScheme.name}</td>
-                      <td className="py-2.5 text-right tabular-nums">{formatCurrency(a.netAmount)}</td>
-                      <td className="py-2.5 text-right tabular-nums">{formatCurrency(a.paidAmount)}</td>
-                      <td className="py-2.5"><span className="badge badge-blue">{a.status}</span></td>
-                    </tr>
-                  ))}
+                  {assessments.map((a) => {
+                    const active = (a.installments || []).filter((i) => i.status !== 'CANCELLED');
+                    const paid   = active.filter((i) => i.status === 'PAID').length;
+                    return (
+                      <tr key={a.id}>
+                        <td className="py-2.5 font-mono text-xs">{a.assessmentNo}</td>
+                        <td className="py-2.5">{a.enrollment.schoolYear.code}</td>
+                        <td className="py-2.5">{a.enrollment.gradeLevel.name}</td>
+                        <td className="py-2.5">{a.enrollment.paymentScheme.name}</td>
+                        <td className="py-2.5 text-right tabular-nums">{formatCurrency(a.netAmount)}</td>
+                        <td className="py-2.5 text-right tabular-nums">{formatCurrency(a.paidAmount)}</td>
+                        <td className="py-2.5 text-center tabular-nums text-gray-500">
+                          {active.length > 0 ? `${paid}/${active.length}` : '—'}
+                        </td>
+                        <td className="py-2.5"><span className="badge badge-blue">{a.status}</span></td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

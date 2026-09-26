@@ -123,6 +123,7 @@ router.get('/assessments', assessments.listAssessments);
 router.get('/assessments/:id', param('id').isInt(), validate, assessments.getAssessment);
 router.post('/assessments/:id/issue', canEdit, param('id').isInt(), validate, assessments.issueAssessment);
 router.post('/assessments/:id/cancel', canSetup, param('id').isInt(), validate, assessments.cancelEnrollment);
+router.post('/assessments/:id/email', canEdit, param('id').isInt(), validate, assessments.emailAssessment);
 
 // ── Billing run ────────────────────────────────────────────────────────────
 router.get('/billing/preview', query('upTo').isISO8601(), validate, billing.previewBillingRun);

@@ -7,7 +7,7 @@ import { formatCurrency, formatDate } from '@/lib/auth';
 import { printDocument, phpFmt, dateFmt } from '@/lib/print';
 import toast from 'react-hot-toast';
 import {
-  ArrowLeft, Printer, Loader2, CheckCircle2, XCircle, AlertTriangle, Receipt,
+  ArrowLeft, Printer, Loader2, CheckCircle2, XCircle, AlertTriangle, Receipt, Mail,
 } from 'lucide-react';
 
 const STATUS_BADGE = {
@@ -22,6 +22,7 @@ export default function AssessmentDetailPage() {
   const [a, setA] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [emailing, setEmailing] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -65,6 +66,16 @@ export default function AssessmentDetailPage() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const emailAssessment = async () => {
+    setEmailing(true);
+    try {
+      const { data } = await sApi.assessments.email(id);
+      toast.success(data.message);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Could not send this assessment by email');
+    } finally { setEmailing(false); }
   };
 
   const printForm = () => {
@@ -145,6 +156,10 @@ export default function AssessmentDetailPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <button onClick={emailAssessment} disabled={emailing} className="btn-secondary flex items-center gap-2">
+            {emailing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+            Send to email
+          </button>
           <button onClick={printForm} className="btn-secondary flex items-center gap-2">
             <Printer className="h-4 w-4" /> Print
           </button>

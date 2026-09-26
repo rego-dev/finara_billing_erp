@@ -18,6 +18,7 @@ const { computeAssessment, buildSchedule, allocateInstallment, round2 } = requir
 const schoolInvoice = require('../utils/schoolInvoice');
 const policy = require('../utils/schoolPolicy');
 const studentLedger = require('../utils/studentLedger');
+const mailer = require('../utils/mailer');
 
 const studentLabel = (s) =>
   `${[s.lastName + ',', s.firstName, s.middleName, s.suffix].filter(Boolean).join(' ')} (${s.studentNo})`;
@@ -333,6 +334,60 @@ exports.getAssessment = async (req, res, next) => {
     });
     if (!assessment) throw createError('Assessment not found', 404);
     res.json({ ...assessment, studentLabel: studentLabel(assessment.student) });
+  } catch (err) { next(err); }
+};
+
+/**
+ * Email the assessment (fee breakdown + payment schedule) to whoever should
+ * see it: the primary-payer guardian first, then any other guardian with an
+ * email on file, then the student's own — matching who a registrar would
+ * actually hand the printed form to at the window.
+ */
+exports.emailAssessment = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!mailer.getTransporter()) throw createError('Email is not configured (SMTP env vars missing)', 400);
+
+    const assessment = await prisma.assessment.findFirst({
+      where: { id, businessId: req.businessId },
+      include: {
+        student: { include: { guardians: true, customer: true } },
+        lines: { orderBy: { sortOrder: 'asc' } },
+        installments: { orderBy: { seq: 'asc' } },
+      },
+    });
+    if (!assessment) throw createError('Assessment not found', 404);
+
+    const { guardians } = assessment.student;
+    const recipientEmail =
+      guardians.find((g) => g.isPrimaryPayer && g.email)?.email
+      ?? guardians.find((g) => g.email)?.email
+      ?? assessment.student.email
+      ?? assessment.student.customer?.email
+      ?? null;
+    const recipientName =
+      guardians.find((g) => g.email === recipientEmail)?.name
+      ?? studentLabel(assessment.student);
+    if (!recipientEmail) {
+      throw createError('No email address on file for a guardian, the student, or the linked customer record', 400);
+    }
+
+    const companySetting = await prisma.systemSetting.findFirst({
+      where: { businessId: req.businessId, key: 'companyName' },
+    });
+
+    const sent = await mailer.sendAssessmentEmail(
+      { ...assessment, studentLabel: studentLabel(assessment.student) },
+      { email: recipientEmail, name: recipientName },
+      { companyName: companySetting?.value }
+    );
+    if (!sent) throw createError('Email could not be sent. Check SMTP configuration.', 400);
+
+    await recordAudit({
+      req, action: 'EMAIL', entity: 'Assessment', entityId: id,
+      summary: `Emailed assessment ${assessment.assessmentNo} to ${recipientEmail}`,
+    });
+    res.json({ message: `Assessment emailed to ${recipientEmail}` });
   } catch (err) { next(err); }
 };
 
