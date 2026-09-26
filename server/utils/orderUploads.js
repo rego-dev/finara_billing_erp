@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const { createError } = require('../middleware/errorHandler');
+const logger = require('./logger');
 
 const DIR = path.join(__dirname, '..', '..', 'uploads', 'orders');
 if (!fs.existsSync(DIR)) fs.mkdirSync(DIR, { recursive: true });
@@ -41,7 +42,9 @@ function sendStoredFile(res, { fileName, mimeType, originalName }) {
   if (!fs.existsSync(p)) throw createError('File missing from storage', 404);
   res.setHeader('Content-Type', mimeType || 'application/octet-stream');
   res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(originalName || fileName)}"`);
-  fs.createReadStream(p).pipe(res);
+  fs.createReadStream(p)
+    .on('error', (e) => { logger.error(`Failed streaming stored file ${path.basename(p)}: ${e.message}`); res.destroy(e); })
+    .pipe(res);
 }
 
 module.exports = { uploadMiddleware, removeStoredFile, sendStoredFile };

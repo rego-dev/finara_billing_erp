@@ -7,6 +7,8 @@ const { createProvisionedBusiness } = require('../utils/provisionBusiness');
 const { removeStoredFile } = require('../utils/orderUploads');
 const logger = require('../utils/logger');
 
+const ORDER_STATUSES = ['PENDING_PAYMENT', 'PROOF_SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED'];
+
 // ─── Prices ──────────────────────────────────────────────────────
 exports.getPrices = async (req, res, next) => {
   try { res.json(await prisma.planPrice.findMany({ orderBy: [{ companyType: 'asc' }, { period: 'asc' }] })); }
@@ -63,7 +65,9 @@ exports.saveInstructions = async (req, res, next) => {
 // ─── Orders ──────────────────────────────────────────────────────
 exports.listOrders = async (req, res, next) => {
   try {
-    const where = req.query.status ? { status: String(req.query.status) } : {};
+    const status = req.query.status;
+    if (status && !ORDER_STATUSES.includes(String(status))) throw createError('Invalid status', 400);
+    const where = status ? { status: String(status) } : {};
     res.json(await prisma.businessOrder.findMany({
       where,
       orderBy: { id: 'desc' },
@@ -115,7 +119,7 @@ exports.approve = async (req, res, next) => {
     } catch (linkErr) {
       logger.error(`Business order ${order.orderNo} (id ${id}) is APPROVED but linking business ${biz.id} failed: ${linkErr.message}`);
     }
-    await recordAudit({ req, action: 'APPROVE', entity: 'BusinessOrder', entityId: id, summary: `Approved ${order.orderNo}; created business "${biz.name}"` });
+    await recordAudit({ req, action: 'APPROVE', entity: 'BusinessOrder', entityId: id, businessId: biz.id, summary: `Approved ${order.orderNo}; created business "${biz.name}"` });
     res.json({ message: `Approved — ${biz.name} created`, businessId: biz.id });
   } catch (err) { next(err); }
 };

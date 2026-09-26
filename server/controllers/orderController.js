@@ -67,27 +67,39 @@ exports.list = async (req, res, next) => {
 };
 
 exports.submitProof = async (req, res, next) => {
+  const newFile = req.file?.filename;
+  let stored = false; // true once the DB write succeeded and the new file is referenced
   try {
     const id = Number(req.params.id);
     const referenceNo = String(req.body.referenceNo || '').trim();
+    if (referenceNo.length > 100) throw createError('Reference number is too long', 400);
     const order = await prisma.businessOrder.findFirst({ where: { id, userId: req.user.id } });
-    if (!order) { removeStoredFile(req.file?.filename); throw createError('Order not found', 404); }
-    if (!OPEN.includes(order.status)) { removeStoredFile(req.file?.filename); throw createError('This order can no longer be changed', 409); }
+    if (!order) throw createError('Order not found', 404);
+    if (!OPEN.includes(order.status)) throw createError('This order can no longer be changed', 409);
     if (!referenceNo && !req.file) throw createError('Enter the payment reference number or attach a proof', 400);
 
     const data = { status: 'PROOF_SUBMITTED', referenceNo: referenceNo || order.referenceNo };
     if (req.file) {
-      removeStoredFile(order.proofFileName);
       Object.assign(data, {
         proofFileName: req.file.filename,
-        proofOriginalName: req.file.originalname,
+        proofOriginalName: req.file.originalname.slice(-255),
         proofMimeType: req.file.mimetype,
       });
     }
-    const updated = await prisma.businessOrder.update({ where: { id }, data });
+    // Status-guarded write: an admin approving in between makes this a no-op.
+    const { count } = await prisma.businessOrder.updateMany({
+      where: { id, userId: req.user.id, status: { in: OPEN } },
+      data,
+    });
+    if (!count) throw createError('This order can no longer be changed', 409);
+    stored = true;
+    if (req.file) removeStoredFile(order.proofFileName);
     await recordAudit({ req, action: 'UPDATE', entity: 'BusinessOrder', entityId: id, summary: `Submitted payment proof for ${order.orderNo}` });
-    res.json(updated);
-  } catch (err) { next(err); }
+    res.json({ ...order, ...data });
+  } catch (err) {
+    if (!stored) removeStoredFile(newFile);
+    next(err);
+  }
 };
 
 exports.cancel = async (req, res, next) => {

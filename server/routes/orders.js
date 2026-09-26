@@ -8,6 +8,9 @@ const admin = require('../controllers/orderAdminController');
 // depend on resolveBusiness (which rejects a user that has no business yet).
 router.use(authenticate);
 
+// Reject non-numeric ids before any upload middleware touches the disk.
+router.param('id', (req, res, next, v) => (/^\d+$/.test(v) ? next() : res.status(400).json({ error: 'Invalid order id' })));
+
 const superOnly = authorize('SUPER_ADMIN');   // ADMIN is deliberately not enough
 router.get('/admin/prices',                 superOnly, admin.getPrices);
 router.put('/admin/prices',                 superOnly, admin.savePrices);

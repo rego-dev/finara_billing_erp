@@ -98,13 +98,56 @@ describe('orderController.submitProof', () => {
 
   test('moves the order to PROOF_SUBMITTED and stores the reference + file', async () => {
     prisma.businessOrder.findFirst.mockResolvedValue({ ...order, proofFileName: 'old.png' });
-    prisma.businessOrder.update.mockImplementation(async ({ data }) => ({ id: 5, ...data }));
+    prisma.businessOrder.updateMany.mockResolvedValue({ count: 1 });
     const file = { filename: 'new.png', originalname: 'gcash.png', mimetype: 'image/png' };
 
     const out = await call(ctrl.submitProof, { params: { id: '5' }, body: { referenceNo: ' GC123 ' }, file });
 
+    expect(prisma.businessOrder.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 5, userId: 7, status: { in: ['PENDING_PAYMENT', 'PROOF_SUBMITTED'] } },
+    }));
     expect(out).toMatchObject({ status: 'PROOF_SUBMITTED', referenceNo: 'GC123', proofFileName: 'new.png' });
     expect(uploads.removeStoredFile).toHaveBeenCalledWith('old.png');
+  });
+
+  test('a lost race (count 0) is a 409 and removes only the NEW upload', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ ...order, proofFileName: 'old.png' });
+    prisma.businessOrder.updateMany.mockResolvedValue({ count: 0 });
+    const file = { filename: 'new.png', originalname: 'g.png', mimetype: 'image/png' };
+    await expect(call(ctrl.submitProof, { params: { id: '5' }, body: { referenceNo: 'X' }, file }))
+      .rejects.toMatchObject({ statusCode: 409 });
+    expect(uploads.removeStoredFile).toHaveBeenCalledWith('new.png');
+    expect(uploads.removeStoredFile).not.toHaveBeenCalledWith('old.png');
+  });
+
+  test('the old proof is removed only after the write succeeds', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ ...order, proofFileName: 'old.png' });
+    let writeDone = false;
+    prisma.businessOrder.updateMany.mockImplementation(async () => { writeDone = true; return { count: 1 }; });
+    uploads.removeStoredFile.mockImplementation((n) => { if (n === 'old.png') expect(writeDone).toBe(true); });
+    const file = { filename: 'new.png', originalname: 'g.png', mimetype: 'image/png' };
+    await call(ctrl.submitProof, { params: { id: '5' }, body: { referenceNo: 'X' }, file });
+    expect(uploads.removeStoredFile).toHaveBeenCalledWith('old.png');
+    uploads.removeStoredFile.mockReset();
+  });
+
+  test('a failed write removes the new upload and keeps the old proof', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ ...order, proofFileName: 'old.png' });
+    prisma.businessOrder.updateMany.mockRejectedValue(new Error('db down'));
+    const file = { filename: 'new.png', originalname: 'g.png', mimetype: 'image/png' };
+    await expect(call(ctrl.submitProof, { params: { id: '5' }, body: { referenceNo: 'X' }, file }))
+      .rejects.toThrow('db down');
+    expect(uploads.removeStoredFile).toHaveBeenCalledWith('new.png');
+    expect(uploads.removeStoredFile).not.toHaveBeenCalledWith('old.png');
+  });
+
+  test('a reference number over 100 chars is a 400 and removes the new upload', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue(order);
+    const file = { filename: 'new.png', originalname: 'g.png', mimetype: 'image/png' };
+    await expect(call(ctrl.submitProof, { params: { id: '5' }, body: { referenceNo: 'x'.repeat(101) }, file }))
+      .rejects.toMatchObject({ statusCode: 400, message: 'Reference number is too long' });
+    expect(uploads.removeStoredFile).toHaveBeenCalledWith('new.png');
+    expect(prisma.businessOrder.updateMany).not.toHaveBeenCalled();
   });
 });
 

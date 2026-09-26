@@ -13,6 +13,7 @@ export default function PlansPage() {
   const router = useRouter();
   const [allowed, setAllowed] = useState(false);
   const [grid, setGrid]       = useState({});          // "TYPE:PERIOD" -> { amount, isActive }
+  const [saved, setSaved]     = useState({});          // "TYPE:PERIOD" -> saved server row
   const [text, setText]       = useState('');
   const [hasQr, setHasQr]     = useState(false);
   const [qrFile, setQrFile]   = useState(null);
@@ -21,14 +22,23 @@ export default function PlansPage() {
 
   const loadQr = () => ordersApi.qrBlob().then(({ data }) => setQrUrl(URL.createObjectURL(data))).catch(() => setQrUrl(null));
 
+  const applyPrices = (rows) => {
+    const g = {}; const sv = {};
+    rows.forEach((r) => {
+      const k = cellKey(r.companyType, r.period);
+      g[k] = { amount: String(r.amount), isActive: r.isActive };
+      sv[k] = r;
+    });
+    setGrid(g); setSaved(sv);
+  };
+
   useEffect(() => {
     if (getUser()?.role !== 'SUPER_ADMIN') { router.replace('/dashboard'); return; }
     setAllowed(true);
     Promise.all([ordersApi.admin.prices(), ordersApi.admin.instructions()])
       .then(([p, i]) => {
-        const g = {};
-        p.data.forEach((r) => { g[cellKey(r.companyType, r.period)] = { amount: String(r.amount), isActive: r.isActive }; });
-        setGrid(g); setText(i.data.text); setHasQr(i.data.hasQr);
+        applyPrices(p.data);
+        setText(i.data.text); setHasQr(i.data.hasQr);
         if (i.data.hasQr) loadQr();
       })
       .catch(() => toast.error('Failed to load plans'));
@@ -37,11 +47,20 @@ export default function PlansPage() {
   const setCell = (t, p, patch) => setGrid((g) => ({ ...g, [cellKey(t, p)]: { amount: '', isActive: true, ...g[cellKey(t, p)], ...patch } }));
 
   const savePrices = async () => {
-    const prices = Object.entries(grid)
-      .filter(([, v]) => v.amount !== '')
-      .map(([k, v]) => { const [companyType, period] = k.split(':'); return { companyType, period, amount: Number(v.amount), isActive: v.isActive }; });
+    const prices = [];
+    const keys = new Set([...Object.keys(grid), ...Object.keys(saved)]);
+    keys.forEach((k) => {
+      const [companyType, period] = k.split(':');
+      const v = grid[k];
+      if (v && v.amount !== '') {
+        prices.push({ companyType, period, amount: Number(v.amount), isActive: v.isActive });
+      } else if (saved[k]) {
+        // cleared cell that was saved before: deactivate it (server never deletes)
+        prices.push({ companyType, period, amount: Number(saved[k].amount), isActive: false });
+      }
+    });
     setSaving(true);
-    try { await ordersApi.admin.savePrices(prices); toast.success('Prices saved'); }
+    try { const { data } = await ordersApi.admin.savePrices(prices); applyPrices(data); toast.success('Prices saved'); }
     catch (err) { toast.error(err.response?.data?.error || 'Could not save prices'); }
     finally { setSaving(false); }
   };
@@ -96,7 +115,7 @@ export default function PlansPage() {
             ))}
           </tbody>
         </table>
-        <p className="text-xs text-gray-500 mt-2">Leave a price empty (or untick active) to stop offering that plan. Existing orders keep the price they were placed at.</p>
+        <p className="text-xs text-gray-500 mt-2">Clear a price or untick active to stop offering that plan. Existing orders keep the price they were placed at.</p>
         <button className="btn-primary mt-4" disabled={saving} onClick={savePrices}>Save prices</button>
       </div></div>
 

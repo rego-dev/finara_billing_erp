@@ -11,6 +11,7 @@ jest.mock('../server/utils/provisionBusiness', () => ({ createProvisionedBusines
 jest.mock('../server/utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 
 const prisma = require('../server/config/database');
+const { recordAudit } = require('../server/utils/audit');
 const logger = require('../server/utils/logger');
 const { createProvisionedBusiness } = require('../server/utils/provisionBusiness');
 const { removeStoredFile } = require('../server/utils/orderUploads');
@@ -51,6 +52,7 @@ describe('approve', () => {
     expect(arg.paidUntil.getTime()).toBeGreaterThan(Date.now() + 360 * 864e5); // ~1 year out
     expect(prisma.businessOrder.update).toHaveBeenCalledWith({ where: { id: 9 }, data: { businessId: 42 } });
     expect(out).toMatchObject({ businessId: 42 });
+    expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: 'APPROVE', businessId: 42 }));
   });
 
   test('a second approve (status already claimed) is a 409 and creates nothing', async () => {
@@ -83,6 +85,25 @@ describe('approve', () => {
       .mockRejectedValueOnce(new Error('revert failed'));
     await expect(call(ctrl.approve, { params: { id: '9' } })).rejects.toThrow('boom');
     expect(logger.error).toHaveBeenCalled();
+  });
+});
+
+describe('listOrders', () => {
+  test.each(['PENDING_PAYMENT', 'PROOF_SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED'])('passes status %s through', async (status) => {
+    prisma.businessOrder.findMany.mockResolvedValue([]);
+    await call(ctrl.listOrders, { query: { status } });
+    expect(prisma.businessOrder.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { status } }));
+  });
+
+  test('no status means no filter', async () => {
+    prisma.businessOrder.findMany.mockResolvedValue([]);
+    await call(ctrl.listOrders, { query: {} });
+    expect(prisma.businessOrder.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: {} }));
+  });
+
+  test('an unknown status is a 400', async () => {
+    await expect(call(ctrl.listOrders, { query: { status: 'HACKED' } })).rejects.toMatchObject({ statusCode: 400, message: 'Invalid status' });
+    expect(prisma.businessOrder.findMany).not.toHaveBeenCalled();
   });
 });
 
