@@ -8,7 +8,10 @@ jest.mock('../server/utils/audit', () => ({ recordAudit: jest.fn() }));
 jest.mock('../server/utils/orderUploads', () => ({ removeStoredFile: jest.fn() }));
 jest.mock('../server/utils/provisionBusiness', () => ({ createProvisionedBusiness: jest.fn() }));
 
+jest.mock('../server/utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
+
 const prisma = require('../server/config/database');
+const logger = require('../server/utils/logger');
 const { createProvisionedBusiness } = require('../server/utils/provisionBusiness');
 const { removeStoredFile } = require('../server/utils/orderUploads');
 const ctrl = require('../server/controllers/orderAdminController');
@@ -28,6 +31,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   prisma.businessOrder.updateMany.mockResolvedValue({ count: 1 });
   prisma.businessOrder.findUnique.mockResolvedValue(order);
+  prisma.businessOrder.update.mockResolvedValue({});
   createProvisionedBusiness.mockResolvedValue({ id: 42, name: 'Acme' });
 });
 
@@ -62,6 +66,23 @@ describe('approve', () => {
       where: { id: 9 },
       data: { status: 'PROOF_SUBMITTED', reviewedById: null, reviewedAt: null },
     });
+  });
+
+  test('if linking the business fails the order stays APPROVED (no revert) and the failure is logged', async () => {
+    prisma.businessOrder.update.mockRejectedValue(new Error('link failed'));
+    const out = await call(ctrl.approve, { params: { id: '9' } });
+    expect(out).toMatchObject({ businessId: 42 });
+    expect(prisma.businessOrder.updateMany).toHaveBeenCalledTimes(1); // the claim only
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('42'));
+  });
+
+  test('if provisioning AND the revert both fail, the original provisioning error surfaces', async () => {
+    createProvisionedBusiness.mockRejectedValue(new Error('boom'));
+    prisma.businessOrder.updateMany
+      .mockResolvedValueOnce({ count: 1 })
+      .mockRejectedValueOnce(new Error('revert failed'));
+    await expect(call(ctrl.approve, { params: { id: '9' } })).rejects.toThrow('boom');
+    expect(logger.error).toHaveBeenCalled();
   });
 });
 

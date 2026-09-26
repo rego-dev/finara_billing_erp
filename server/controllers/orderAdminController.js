@@ -5,6 +5,7 @@ const { COMPANY_TYPES } = require('../utils/companyTypes');
 const { PERIODS, computePaidUntil } = require('../utils/orderPricing');
 const { createProvisionedBusiness } = require('../utils/provisionBusiness');
 const { removeStoredFile } = require('../utils/orderUploads');
+const logger = require('../utils/logger');
 
 // ─── Prices ──────────────────────────────────────────────────────
 exports.getPrices = async (req, res, next) => {
@@ -73,8 +74,11 @@ exports.listOrders = async (req, res, next) => {
 
 // Atomic claim: only one caller can move PROOF_SUBMITTED → APPROVED, so a
 // double-click or two admins can never create two businesses. Provisioning
-// uses the global prisma client (not a tx), so on failure we revert the claim
-// (createProvisionedBusiness has already rolled its own half-built rows back).
+// uses the global prisma client (not a tx), so if provisioning fails we revert
+// the claim (createProvisionedBusiness has already rolled its own half-built
+// rows back); a failed revert is logged so the original error still surfaces.
+// Once the business exists the order is never reverted (a retry would create a
+// duplicate): a failed businessId link is only logged for manual reconciliation.
 exports.approve = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -84,25 +88,35 @@ exports.approve = async (req, res, next) => {
     });
     if (!claimed.count) throw createError('This order is not awaiting approval', 409);
 
+    let order, biz;
     try {
-      const order = await prisma.businessOrder.findUnique({ where: { id }, include: { user: true } });
-      const biz = await createProvisionedBusiness({
+      order = await prisma.businessOrder.findUnique({ where: { id }, include: { user: true } });
+      biz = await createProvisionedBusiness({
         name: order.companyName, tin: order.tin, address: order.address, phone: order.phone,
         email: order.user.email,
         companyType: order.companyType, taxType: order.taxType, booksStartDate: order.booksStartDate,
         ownerUserId: order.userId,
         paidUntil: computePaidUntil(new Date(), order.period),
       });
-      await prisma.businessOrder.update({ where: { id }, data: { businessId: biz.id } });
-      await recordAudit({ req, action: 'APPROVE', entity: 'BusinessOrder', entityId: id, summary: `Approved ${order.orderNo}; created business "${biz.name}"` });
-      res.json({ message: `Approved — ${biz.name} created`, businessId: biz.id });
     } catch (err) {
-      await prisma.businessOrder.updateMany({
-        where: { id },
-        data: { status: 'PROOF_SUBMITTED', reviewedById: null, reviewedAt: null },
-      });
+      try {
+        await prisma.businessOrder.updateMany({
+          where: { id },
+          data: { status: 'PROOF_SUBMITTED', reviewedById: null, reviewedAt: null },
+        });
+      } catch (revertErr) {
+        logger.error(`Failed to revert claim on business order ${id}: ${revertErr.message}`);
+      }
       throw err;
     }
+
+    try {
+      await prisma.businessOrder.update({ where: { id }, data: { businessId: biz.id } });
+    } catch (linkErr) {
+      logger.error(`Business order ${order.orderNo} (id ${id}) is APPROVED but linking business ${biz.id} failed: ${linkErr.message}`);
+    }
+    await recordAudit({ req, action: 'APPROVE', entity: 'BusinessOrder', entityId: id, summary: `Approved ${order.orderNo}; created business "${biz.name}"` });
+    res.json({ message: `Approved — ${biz.name} created`, businessId: biz.id });
   } catch (err) { next(err); }
 };
 
