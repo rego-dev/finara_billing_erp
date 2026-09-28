@@ -3,8 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { orders as ordersApi } from '@/lib/api';
-import { getUser } from '@/lib/auth';
-import { formatCurrency } from '@/lib/auth';
+import { getUser, formatCurrency } from '@/lib/auth';
 import { COMPANY_TYPES } from '@/lib/companyTypes';
 
 const EMPTY_ROW = { monthlyAmount: '', monthlyActive: true, discountPercent: '0', yearlyActive: true };
@@ -145,7 +144,7 @@ export default function PlansPage() {
                         {yearly !== null ? formatCurrency(yearly) : 'set monthly first'}
                       </span>
                       <label className="text-xs flex items-center gap-1">
-                        <input type="checkbox" checked={row.yearlyActive} disabled={yearly === null}
+                        <input type="checkbox" checked={row.monthlyActive && row.yearlyActive} disabled={yearly === null || !row.monthlyActive}
                           onChange={(e) => setRow(t.key, { yearlyActive: e.target.checked })} /> active
                       </label>
                     </div>

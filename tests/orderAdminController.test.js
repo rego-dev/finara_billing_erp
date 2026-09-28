@@ -127,6 +127,18 @@ describe('reject', () => {
   });
 });
 
+describe('getPrices', () => {
+  test('returns discountPercent as stored, unmodified', async () => {
+    const stored = [
+      { companyType: 'SERVICES', period: 'MONTHLY', amount: 1000, isActive: true, discountPercent: 5 },
+      { companyType: 'SERVICES', period: 'YEARLY', amount: 11400, isActive: true, discountPercent: null },
+    ];
+    prisma.planPrice.findMany.mockResolvedValue(stored);
+    const out = await call(ctrl.getPrices, {});
+    expect(out).toEqual(stored);
+  });
+});
+
 describe('savePrices', () => {
   beforeEach(() => {
     prisma.planPrice.findMany.mockResolvedValue([]);

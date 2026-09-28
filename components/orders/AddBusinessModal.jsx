@@ -137,7 +137,7 @@ export default function AddBusinessModal({ order: initialOrder = null, onClose, 
                 : price ? (
                   <>
                     Amount to pay: <strong>{formatCurrency(price.amount)}</strong>
-                    {savings > 0 && (
+                    {savingsPercent > 0 && (
                       <div className="text-green-600 text-xs mt-1">
                         Save {savingsPercent}% — {formatCurrency(savings)} off vs. paying monthly
                       </div>
