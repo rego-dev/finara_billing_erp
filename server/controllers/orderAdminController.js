@@ -42,6 +42,11 @@ exports.savePrices = async (req, res, next) => {
       }
     });
 
+    // Only company types genuinely submitted as MONTHLY should get a MONTHLY
+    // upsert. Captured before the DB-fallback lookup below mutates
+    // monthlyByType by merging in DB-only data for YEARLY-only submissions.
+    const submittedMonthlyTypes = new Set(Object.keys(monthlyByType));
+
     // A YEARLY row's amount is always derived from its sibling MONTHLY row. If
     // that sibling wasn't part of this save, fall back to the DB so the
     // amount can still be computed correctly.
@@ -58,7 +63,8 @@ exports.savePrices = async (req, res, next) => {
     }
 
     const ops = [];
-    Object.entries(monthlyByType).forEach(([companyType, m]) => {
+    submittedMonthlyTypes.forEach((companyType) => {
+      const m = monthlyByType[companyType];
       ops.push(prisma.planPrice.upsert({
         where: { companyType_period: { companyType, period: 'MONTHLY' } },
         update: { amount: m.amount, isActive: m.isActive, discountPercent: m.discountPercent },

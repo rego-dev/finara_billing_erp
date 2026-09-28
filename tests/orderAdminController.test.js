@@ -189,6 +189,9 @@ describe('savePrices', () => {
       where: { companyType_period: { companyType: 'SERVICES', period: 'YEARLY' } },
       update: { amount: 11400, isActive: true, discountPercent: null },
     }));
+    expect(prisma.planPrice.upsert).not.toHaveBeenCalledWith(expect.objectContaining({
+      where: { companyType_period: { companyType: 'SERVICES', period: 'MONTHLY' } },
+    }));
   });
 
   test('forces yearly inactive when there is no monthly price for that company type at all', async () => {
