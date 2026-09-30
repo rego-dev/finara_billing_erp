@@ -51,7 +51,7 @@ export default function MyBusinessesPage() {
               <table className="w-full text-sm">
                 <thead><tr className="text-left text-xs text-gray-500 uppercase">
                   <th className="py-2">Name</th><th className="py-2">Type</th><th className="py-2">Code</th><th className="py-2">Paid until</th>
-                  {isSuperAdmin && <th className="py-2" />}
+                  {isSuperAdmin && <th className="py-2">Actions</th>}
                 </tr></thead>
                 <tbody className="divide-y dark:divide-gray-700">
                   {list.map((b) => (

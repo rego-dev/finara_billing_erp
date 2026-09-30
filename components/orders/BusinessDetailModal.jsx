@@ -85,7 +85,7 @@ export default function BusinessDetailModal({ businessId, onClose }) {
                   <thead><tr className="text-left text-xs text-gray-500 uppercase">
                     <th className="py-2">Order</th><th className="py-2">Period</th>
                     <th className="py-2 text-right">Amount</th><th className="py-2">Reference</th>
-                    <th className="py-2">Status</th><th className="py-2">Date</th><th className="py-2" />
+                    <th className="py-2">Status</th><th className="py-2">Ordered</th><th className="py-2">Approved</th><th className="py-2" />
                   </tr></thead>
                   <tbody className="divide-y dark:divide-gray-700">
                     {ordersList.map((o) => {
@@ -98,6 +98,7 @@ export default function BusinessDetailModal({ businessId, onClose }) {
                           <td className="py-2.5">{o.referenceNo || '—'}</td>
                           <td className="py-2.5"><span className={`badge ${s.cls}`}>{s.label}</span></td>
                           <td className="py-2.5">{formatDate(o.createdAt)}</td>
+                          <td className="py-2.5">{o.reviewedAt ? formatDate(o.reviewedAt) : '—'}</td>
                           <td className="py-2.5 text-right whitespace-nowrap">
                             {o.proofFileName && <button className="btn-secondary" onClick={() => viewProof(o)}>View proof</button>}
                           </td>
