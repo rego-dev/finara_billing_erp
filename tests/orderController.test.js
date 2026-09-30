@@ -9,9 +9,6 @@ jest.mock('../server/utils/audit', () => ({ recordAudit: jest.fn() }));
 jest.mock('../server/utils/orderUploads', () => ({
   uploadMiddleware: jest.fn(), removeStoredFile: jest.fn(), sendStoredFile: jest.fn(),
 }));
-jest.mock('../server/utils/businessAccess', () => ({
-  assertBusinessAccess: jest.fn(),
-}));
 
 const prisma = require('../server/config/database');
 const uploads = require('../server/utils/orderUploads');
@@ -30,7 +27,6 @@ beforeEach(() => {
   jest.clearAllMocks();
   prisma.planPrice.findUnique.mockResolvedValue({ amount: 999, isActive: true });
   prisma.businessOrder.create.mockImplementation(async ({ data }) => ({ id: 1, ...data }));
-  assertBusinessAccess.mockResolvedValue(undefined);
 });
 
 describe('orderController.create', () => {
@@ -206,9 +202,7 @@ describe('orderController.renewQuote', () => {
   });
 
   test('403s via the shared access check', async () => {
-    const err = new Error('Access denied to this business');
-    err.statusCode = 403;
-    assertBusinessAccess.mockRejectedValue(err);
+    prisma.userBusiness.findUnique.mockResolvedValue(null);
     await expect(call(ctrl.renewQuote, { params: { businessId: '3' } })).rejects.toMatchObject({ statusCode: 403 });
   });
 
@@ -256,9 +250,7 @@ describe('orderController.renew', () => {
   });
 
   test('403s via the shared access check', async () => {
-    const err = new Error('Access denied to this business');
-    err.statusCode = 403;
-    assertBusinessAccess.mockRejectedValue(err);
+    prisma.userBusiness.findUnique.mockResolvedValue(null);
     await expect(call(ctrl.renew, { params: { businessId: '3' }, body: { period: 'MONTHLY' } }))
       .rejects.toMatchObject({ statusCode: 403 });
   });
