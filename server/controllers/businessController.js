@@ -5,6 +5,7 @@ const { cloneChartOfAccounts } = require('../utils/cloneChartOfAccounts');
 const { resetDemoBusiness } = require('../../prisma/seedDemo');
 const { COMPANY_TYPES, TAX_TYPES } = require('../utils/companyTypes');
 const { provisionByType, rollbackBusiness, createProvisionedBusiness } = require('../utils/provisionBusiness');
+const { assertBusinessAccess } = require('../utils/businessAccess');
 
 // ─── List all businesses the current user can access ─────────────
 exports.list = async (req, res, next) => {
@@ -30,18 +31,7 @@ exports.list = async (req, res, next) => {
 exports.get = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-
-    // Non-admins may only fetch a business they've been granted access to —
-    // same restriction list() already applies. Without this, any authenticated
-    // user could read another business's profile (name, TIN, address, contact
-    // info) just by guessing its id.
-    if (!['ADMIN', 'SUPER_ADMIN'].includes(req.user.role)) {
-      const ub = await prisma.userBusiness.findUnique({
-        where: { userId_businessId: { userId: req.user.id, businessId: id } },
-      });
-      if (!ub) throw createError('Access denied to this business', 403);
-    }
-
+    await assertBusinessAccess(req.user, id);
     const biz = await prisma.business.findUnique({ where: { id } });
     if (!biz) throw createError('Business not found', 404);
     res.json(biz);
