@@ -5,6 +5,7 @@ const { COMPANY_TYPES } = require('../utils/companyTypes');
 const { PERIODS, computePaidUntil, computeYearlyAmount } = require('../utils/orderPricing');
 const { createProvisionedBusiness } = require('../utils/provisionBusiness');
 const { removeStoredFile } = require('../utils/orderUploads');
+const { postSubscriptionPayment } = require('../utils/subscriptionGL');
 const logger = require('../utils/logger');
 
 const ORDER_STATUSES = ['PENDING_PAYMENT', 'PROOF_SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED'];
@@ -179,6 +180,7 @@ exports.approve = async (req, res, next) => {
     }
 
     if (order.businessId) {
+      await postSubscriptionPayment({ order, companyName: biz.name, kind: 'RENEWAL', userId: req.user.id });
       await recordAudit({ req, action: 'APPROVE', entity: 'BusinessOrder', entityId: id, businessId: order.businessId, summary: `Approved ${order.orderNo}; extended "${biz.name}" to ${newPaidUntil.toISOString().slice(0, 10)}` });
       return res.json({ message: `Approved — extended to ${newPaidUntil.toISOString().slice(0, 10)}`, businessId: order.businessId });
     }
@@ -188,6 +190,7 @@ exports.approve = async (req, res, next) => {
     } catch (linkErr) {
       logger.error(`Business order ${order.orderNo} (id ${id}) is APPROVED but linking business ${biz.id} failed: ${linkErr.message}`);
     }
+    await postSubscriptionPayment({ order, companyName: biz.name, kind: 'NEW', userId: req.user.id });
     await recordAudit({ req, action: 'APPROVE', entity: 'BusinessOrder', entityId: id, businessId: biz.id, summary: `Approved ${order.orderNo}; created business "${biz.name}"` });
     res.json({ message: `Approved — ${biz.name} created`, businessId: biz.id });
   } catch (err) { next(err); }

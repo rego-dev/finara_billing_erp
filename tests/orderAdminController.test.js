@@ -8,6 +8,7 @@ jest.mock('../server/config/database', () => ({
 jest.mock('../server/utils/audit', () => ({ recordAudit: jest.fn() }));
 jest.mock('../server/utils/orderUploads', () => ({ removeStoredFile: jest.fn() }));
 jest.mock('../server/utils/provisionBusiness', () => ({ createProvisionedBusiness: jest.fn() }));
+jest.mock('../server/utils/subscriptionGL', () => ({ postSubscriptionPayment: jest.fn() }));
 
 jest.mock('../server/utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 
@@ -16,6 +17,7 @@ const { recordAudit } = require('../server/utils/audit');
 const logger = require('../server/utils/logger');
 const { createProvisionedBusiness } = require('../server/utils/provisionBusiness');
 const { removeStoredFile } = require('../server/utils/orderUploads');
+const { postSubscriptionPayment } = require('../server/utils/subscriptionGL');
 const ctrl = require('../server/controllers/orderAdminController');
 
 const admin = { id: 1, email: 'sa@example.com', role: 'SUPER_ADMIN' };
@@ -54,6 +56,16 @@ describe('approve', () => {
     expect(prisma.businessOrder.update).toHaveBeenCalledWith({ where: { id: 9 }, data: { businessId: 42 } });
     expect(out).toMatchObject({ businessId: 42 });
     expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: 'APPROVE', businessId: 42 }));
+  });
+
+  test('posts a NEW subscription GL entry after successfully creating the business', async () => {
+    await call(ctrl.approve, { params: { id: '9' } });
+    expect(postSubscriptionPayment).toHaveBeenCalledWith({
+      order: expect.objectContaining({ id: 9, orderNo: 'ORD-AAAAAA' }),
+      companyName: 'Acme',
+      kind: 'NEW',
+      userId: 1,
+    });
   });
 
   test('a second approve (status already claimed) is a 409 and creates nothing', async () => {
@@ -132,6 +144,21 @@ describe('approve (renewal orders)', () => {
     expect(prisma.businessOrder.updateMany).toHaveBeenLastCalledWith({
       where: { id: 9 },
       data: { status: 'PROOF_SUBMITTED', reviewedById: null, reviewedAt: null },
+    });
+  });
+
+  test('posts a RENEWAL subscription GL entry after extending paidUntil', async () => {
+    prisma.businessOrder.findUnique.mockResolvedValue(renewalOrder);
+    prisma.business.findUnique.mockResolvedValue({ id: 3, name: 'Acme', paidUntil: null });
+    prisma.business.update.mockResolvedValue({});
+
+    await call(ctrl.approve, { params: { id: '9' } });
+
+    expect(postSubscriptionPayment).toHaveBeenCalledWith({
+      order: expect.objectContaining({ id: 9, orderNo: 'ORD-BBBBBB', businessId: 3 }),
+      companyName: 'Acme',
+      kind: 'RENEWAL',
+      userId: 1,
     });
   });
 });
