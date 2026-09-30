@@ -5,6 +5,7 @@ const { recordAudit } = require('../utils/audit');
 const { COMPANY_TYPES, TAX_TYPES } = require('../utils/companyTypes');
 const { PERIODS } = require('../utils/orderPricing');
 const { removeStoredFile, sendStoredFile } = require('../utils/orderUploads');
+const { assertBusinessAccess } = require('../utils/businessAccess');
 
 const OPEN = ['PENDING_PAYMENT', 'PROOF_SUBMITTED'];
 
@@ -125,5 +126,74 @@ exports.downloadProof = async (req, res, next) => {
     sendStoredFile(res, {
       fileName: order.proofFileName, mimeType: order.proofMimeType, originalName: order.proofOriginalName,
     });
+  } catch (err) { next(err); }
+};
+
+// ─── Renewal ─────────────────────────────────────────────────────
+// Business.industry only stores the display label ("School"), never the
+// plan-pricing key (e.g. "SERVICES") — but every business that has ever been
+// approved through the order flow has a BusinessOrder with that exact key on
+// it. Reusing the most recent one also doubles as the "is a renewal already
+// open?" check: the one-open-renewal-at-a-time rule (enforced in `renew`
+// below) guarantees that if an open order exists for this business, it IS
+// the most recent one.
+exports.renewQuote = async (req, res, next) => {
+  try {
+    const businessId = Number(req.params.businessId);
+    await assertBusinessAccess(req.user, businessId);
+    const biz = await prisma.business.findUnique({ where: { id: businessId } });
+    if (!biz) throw createError('Business not found', 404);
+
+    const last = await prisma.businessOrder.findFirst({
+      where: { businessId },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!last) throw createError('This business has no order on record; it cannot be renewed here', 409);
+
+    const [prices, ins] = await Promise.all([
+      prisma.planPrice.findMany({ where: { companyType: last.companyType, isActive: true } }),
+      prisma.paymentInstruction.findUnique({ where: { id: 1 } }),
+    ]);
+    res.json({ companyType: last.companyType, prices, instructions: { text: ins?.text || '', hasQr: !!ins?.qrFileName } });
+  } catch (err) { next(err); }
+};
+
+exports.renew = async (req, res, next) => {
+  try {
+    const businessId = Number(req.params.businessId);
+    await assertBusinessAccess(req.user, businessId);
+    const biz = await prisma.business.findUnique({ where: { id: businessId } });
+    if (!biz) throw createError('Business not found', 404);
+
+    const { period } = req.body;
+    if (!PERIODS.includes(period)) throw createError('Choose a billing period', 400);
+
+    const last = await prisma.businessOrder.findFirst({
+      where: { businessId },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!last) throw createError('This business has no order on record; it cannot be renewed here', 409);
+    if (OPEN.includes(last.status)) throw createError('This business already has a renewal payment awaiting review', 409);
+
+    const price = await prisma.planPrice.findUnique({
+      where: { companyType_period: { companyType: last.companyType, period } },
+    });
+    if (!price || !price.isActive) {
+      throw createError('This plan is not available yet. Please contact the administrator.', 400);
+    }
+
+    const order = await prisma.businessOrder.create({
+      data: {
+        orderNo: `ORD-${crypto.randomBytes(3).toString('hex').toUpperCase()}`,
+        userId: req.user.id,
+        businessId,
+        companyName: biz.name, tin: biz.tin, address: biz.address, phone: biz.phone,
+        companyType: last.companyType, taxType: biz.taxType,
+        period, amount: price.amount,
+        status: 'PENDING_PAYMENT',
+      },
+    });
+    await recordAudit({ req, action: 'CREATE', entity: 'BusinessOrder', entityId: order.id, businessId, summary: `Renewal order for "${biz.name}" (${order.orderNo})` });
+    res.status(201).json(order);
   } catch (err) { next(err); }
 };

@@ -11,7 +11,7 @@ jest.mock('../server/utils/orderUploads', () => ({
 }));
 jest.mock('../server/controllers/orderController', () => {
   const ok = (req, res) => res.json({ ok: true });
-  return { plans: ok, paymentQr: ok, list: ok, create: ok, submitProof: ok, cancel: ok, downloadProof: ok };
+  return { plans: ok, paymentQr: ok, list: ok, create: ok, submitProof: ok, cancel: ok, downloadProof: ok, renewQuote: ok, renew: ok };
 });
 jest.mock('../server/controllers/orderAdminController', () => {
   const ok = (req, res) => res.json({ ok: true });

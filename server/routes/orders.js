@@ -26,6 +26,8 @@ router.get('/plans',            user.plans);
 router.get('/payment-qr',       user.paymentQr);
 router.get('/',                 user.list);
 router.post('/',                user.create);
+router.get('/renew/:businessId',  user.renewQuote);
+router.post('/renew/:businessId', user.renew);
 router.post('/:id/proof',       uploadMiddleware, user.submitProof);
 router.post('/:id/cancel',      user.cancel);
 router.get('/:id/proof',        user.downloadProof);

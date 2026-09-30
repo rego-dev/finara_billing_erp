@@ -2,14 +2,20 @@ jest.mock('../server/config/database', () => ({
   planPrice:          { findMany: jest.fn(), findUnique: jest.fn() },
   paymentInstruction: { findUnique: jest.fn() },
   businessOrder:      { create: jest.fn(), findMany: jest.fn(), findFirst: jest.fn(), update: jest.fn(), updateMany: jest.fn() },
+  business:           { findUnique: jest.fn() },
+  userBusiness:       { findUnique: jest.fn() },
 }));
 jest.mock('../server/utils/audit', () => ({ recordAudit: jest.fn() }));
 jest.mock('../server/utils/orderUploads', () => ({
   uploadMiddleware: jest.fn(), removeStoredFile: jest.fn(), sendStoredFile: jest.fn(),
 }));
+jest.mock('../server/utils/businessAccess', () => ({
+  assertBusinessAccess: jest.fn(),
+}));
 
 const prisma = require('../server/config/database');
 const uploads = require('../server/utils/orderUploads');
+const { assertBusinessAccess } = require('../server/utils/businessAccess');
 const ctrl = require('../server/controllers/orderController');
 
 const user = { id: 7, email: 'u@example.com', role: 'MANAGER' };
@@ -24,6 +30,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   prisma.planPrice.findUnique.mockResolvedValue({ amount: 999, isActive: true });
   prisma.businessOrder.create.mockImplementation(async ({ data }) => ({ id: 1, ...data }));
+  assertBusinessAccess.mockResolvedValue(undefined);
 });
 
 describe('orderController.create', () => {
@@ -189,5 +196,118 @@ describe('orderController.downloadProof', () => {
   test('404s when there is no proof on file', async () => {
     prisma.businessOrder.findFirst.mockResolvedValue({ proofFileName: null });
     await expect(call(ctrl.downloadProof, { params: { id: '5' } })).rejects.toMatchObject({ statusCode: 404 });
+  });
+});
+
+describe('orderController.renewQuote', () => {
+  beforeEach(() => {
+    prisma.userBusiness.findUnique.mockResolvedValue({ userId: 7, businessId: 3 });
+    prisma.business.findUnique.mockResolvedValue({ id: 3, name: 'Acme' });
+  });
+
+  test('403s via the shared access check', async () => {
+    const err = new Error('Access denied to this business');
+    err.statusCode = 403;
+    assertBusinessAccess.mockRejectedValue(err);
+    await expect(call(ctrl.renewQuote, { params: { businessId: '3' } })).rejects.toMatchObject({ statusCode: 403 });
+  });
+
+  test('ADMIN bypasses the grant check', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ companyType: 'SERVICES', status: 'APPROVED' });
+    prisma.planPrice.findMany.mockResolvedValue([]);
+    prisma.paymentInstruction.findUnique.mockResolvedValue(null);
+    await call(ctrl.renewQuote, { user: { id: 1, role: 'ADMIN' }, params: { businessId: '3' } });
+    expect(prisma.userBusiness.findUnique).not.toHaveBeenCalled();
+  });
+
+  test('404s for an unknown business', async () => {
+    prisma.business.findUnique.mockResolvedValue(null);
+    await expect(call(ctrl.renewQuote, { params: { businessId: '3' } })).rejects.toMatchObject({ statusCode: 404 });
+  });
+
+  test('409s when the business has no order on record', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue(null);
+    await expect(call(ctrl.renewQuote, { params: { businessId: '3' } })).rejects.toMatchObject({ statusCode: 409 });
+  });
+
+  test('resolves companyType from the latest order and returns its active prices', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ id: 9, companyType: 'SERVICES', status: 'APPROVED' });
+    prisma.planPrice.findMany.mockResolvedValue([{ companyType: 'SERVICES', period: 'MONTHLY', amount: 1000 }]);
+    prisma.paymentInstruction.findUnique.mockResolvedValue({ text: 'GCash', qrFileName: 'q.png' });
+
+    const out = await call(ctrl.renewQuote, { params: { businessId: '3' } });
+
+    expect(prisma.businessOrder.findFirst).toHaveBeenCalledWith({ where: { businessId: 3 }, orderBy: { createdAt: 'desc' } });
+    expect(prisma.planPrice.findMany).toHaveBeenCalledWith({ where: { companyType: 'SERVICES', isActive: true } });
+    expect(out).toEqual({
+      companyType: 'SERVICES',
+      prices: [{ companyType: 'SERVICES', period: 'MONTHLY', amount: 1000 }],
+      instructions: { text: 'GCash', hasQr: true },
+    });
+  });
+});
+
+describe('orderController.renew', () => {
+  const biz = { id: 3, name: 'Acme', tin: '123', address: 'Davao', phone: '0900', taxType: 'VAT' };
+
+  beforeEach(() => {
+    prisma.userBusiness.findUnique.mockResolvedValue({ userId: 7, businessId: 3 });
+    prisma.business.findUnique.mockResolvedValue(biz);
+  });
+
+  test('403s via the shared access check', async () => {
+    const err = new Error('Access denied to this business');
+    err.statusCode = 403;
+    assertBusinessAccess.mockRejectedValue(err);
+    await expect(call(ctrl.renew, { params: { businessId: '3' }, body: { period: 'MONTHLY' } }))
+      .rejects.toMatchObject({ statusCode: 403 });
+  });
+
+  test('404s for an unknown business', async () => {
+    prisma.business.findUnique.mockResolvedValue(null);
+    await expect(call(ctrl.renew, { params: { businessId: '3' }, body: { period: 'MONTHLY' } }))
+      .rejects.toMatchObject({ statusCode: 404 });
+  });
+
+  test('rejects an invalid period', async () => {
+    await expect(call(ctrl.renew, { params: { businessId: '3' }, body: { period: 'WEEKLY' } }))
+      .rejects.toMatchObject({ statusCode: 400, message: 'Choose a billing period' });
+    expect(prisma.businessOrder.create).not.toHaveBeenCalled();
+  });
+
+  test('409s when the business has no order on record', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue(null);
+    await expect(call(ctrl.renew, { params: { businessId: '3' }, body: { period: 'MONTHLY' } }))
+      .rejects.toMatchObject({ statusCode: 409 });
+  });
+
+  test('409s when a renewal is already open for this business', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ companyType: 'SERVICES', status: 'PROOF_SUBMITTED' });
+    await expect(call(ctrl.renew, { params: { businessId: '3' }, body: { period: 'MONTHLY' } }))
+      .rejects.toMatchObject({ statusCode: 409 });
+    expect(prisma.businessOrder.create).not.toHaveBeenCalled();
+  });
+
+  test('400s when no active price exists for the resolved type and period', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ companyType: 'SERVICES', status: 'APPROVED' });
+    prisma.planPrice.findUnique.mockResolvedValue(null);
+    await expect(call(ctrl.renew, { params: { businessId: '3' }, body: { period: 'MONTHLY' } }))
+      .rejects.toMatchObject({ statusCode: 400 });
+  });
+
+  test('creates a PENDING_PAYMENT order pre-linked to the business, snapshotting current business fields', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ companyType: 'SERVICES', status: 'APPROVED' });
+    prisma.planPrice.findUnique.mockResolvedValue({ amount: 1000, isActive: true });
+
+    const order = await call(ctrl.renew, { params: { businessId: '3' }, body: { period: 'MONTHLY' } });
+
+    expect(prisma.planPrice.findUnique).toHaveBeenCalledWith({
+      where: { companyType_period: { companyType: 'SERVICES', period: 'MONTHLY' } },
+    });
+    expect(order).toMatchObject({
+      userId: 7, businessId: 3, companyName: 'Acme', tin: '123', address: 'Davao', phone: '0900',
+      companyType: 'SERVICES', taxType: 'VAT', period: 'MONTHLY', amount: 1000, status: 'PENDING_PAYMENT',
+    });
+    expect(order.orderNo).toMatch(/^ORD-[0-9A-F]{6}$/);
   });
 });
