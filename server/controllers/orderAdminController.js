@@ -191,3 +191,20 @@ exports.reject = async (req, res, next) => {
     res.json({ message: 'Order rejected' });
   } catch (err) { next(err); }
 };
+
+// ─── Business detail (My Businesses "View") ───────────────────────
+exports.businessDetail = async (req, res, next) => {
+  try {
+    const businessId = Number(req.params.businessId);
+    const business = await prisma.business.findUnique({ where: { id: businessId } });
+    if (!business) throw createError('Business not found', 404);
+
+    const orders = await prisma.businessOrder.findMany({
+      where: { businessId },
+      orderBy: { createdAt: 'asc' },
+      include: { user: { select: { id: true, email: true, firstName: true, lastName: true } } },
+    });
+
+    res.json({ business, orders });
+  } catch (err) { next(err); }
+};

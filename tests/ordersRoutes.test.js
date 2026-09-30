@@ -15,7 +15,7 @@ jest.mock('../server/controllers/orderController', () => {
 });
 jest.mock('../server/controllers/orderAdminController', () => {
   const ok = (req, res) => res.json({ ok: true });
-  return { getPrices: ok, savePrices: ok, getInstructions: ok, saveInstructions: ok, listOrders: ok, approve: ok, reject: ok };
+  return { getPrices: ok, savePrices: ok, getInstructions: ok, saveInstructions: ok, listOrders: ok, businessDetail: ok, approve: ok, reject: ok };
 });
 
 const { uploadMiddleware } = require('../server/utils/orderUploads');
@@ -42,5 +42,16 @@ describe('order id validation', () => {
     const res = await request(app).post('/api/orders/12/proof');
     expect(res.status).toBe(200);
     expect(uploadMiddleware).toHaveBeenCalled();
+  });
+
+  test('a non-numeric business id is a 400', async () => {
+    const res = await request(app).get('/api/orders/admin/business/abc');
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid business id' });
+  });
+
+  test('a numeric business id passes through', async () => {
+    const res = await request(app).get('/api/orders/admin/business/42');
+    expect(res.status).toBe(200);
   });
 });

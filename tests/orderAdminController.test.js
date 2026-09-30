@@ -3,6 +3,7 @@ jest.mock('../server/config/database', () => ({
   planPrice:          { findMany: jest.fn(), upsert: jest.fn() },
   paymentInstruction: { findUnique: jest.fn(), upsert: jest.fn() },
   businessOrder:      { findMany: jest.fn(), findUnique: jest.fn(), update: jest.fn(), updateMany: jest.fn() },
+  business:           { findUnique: jest.fn() },
 }));
 jest.mock('../server/utils/audit', () => ({ recordAudit: jest.fn() }));
 jest.mock('../server/utils/orderUploads', () => ({ removeStoredFile: jest.fn() }));
@@ -244,5 +245,45 @@ describe('saveInstructions', () => {
     await call(ctrl.saveInstructions, { body: { text: 'New text' } });
     expect(prisma.paymentInstruction.upsert).toHaveBeenCalledWith(expect.objectContaining({ update: { text: 'New text' } }));
     expect(removeStoredFile).not.toHaveBeenCalled();
+  });
+});
+
+describe('businessDetail', () => {
+  const biz = { id: 42, code: 'BIZ-001', name: 'Acme', isActive: true, paidUntil: null };
+  const linkedOrder = {
+    id: 9, orderNo: 'ORD-AAAAAA', businessId: 42, status: 'APPROVED', amount: 1000,
+    createdAt: new Date('2026-01-01'), user: { id: 7, email: 'u@example.com', firstName: 'Jane', lastName: 'Doe' },
+  };
+
+  test('returns the business with its orders, oldest first', async () => {
+    prisma.business.findUnique.mockResolvedValue(biz);
+    prisma.businessOrder.findMany.mockResolvedValue([linkedOrder]);
+
+    const out = await call(ctrl.businessDetail, { params: { businessId: '42' } });
+
+    expect(prisma.business.findUnique).toHaveBeenCalledWith({ where: { id: 42 } });
+    expect(prisma.businessOrder.findMany).toHaveBeenCalledWith({
+      where: { businessId: 42 },
+      orderBy: { createdAt: 'asc' },
+      include: { user: { select: { id: true, email: true, firstName: true, lastName: true } } },
+    });
+    expect(out).toEqual({ business: biz, orders: [linkedOrder] });
+  });
+
+  test('returns an empty orders list for a business with none', async () => {
+    prisma.business.findUnique.mockResolvedValue(biz);
+    prisma.businessOrder.findMany.mockResolvedValue([]);
+
+    const out = await call(ctrl.businessDetail, { params: { businessId: '42' } });
+
+    expect(out).toEqual({ business: biz, orders: [] });
+  });
+
+  test('404s for a business that does not exist', async () => {
+    prisma.business.findUnique.mockResolvedValue(null);
+
+    await expect(call(ctrl.businessDetail, { params: { businessId: '999' } }))
+      .rejects.toMatchObject({ statusCode: 404 });
+    expect(prisma.businessOrder.findMany).not.toHaveBeenCalled();
   });
 });
