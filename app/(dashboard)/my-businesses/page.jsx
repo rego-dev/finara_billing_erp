@@ -7,6 +7,7 @@ import { formatCurrency, formatDate, getUser } from '@/lib/auth';
 import { STATUS } from '@/lib/orderStatus';
 import AddBusinessModal from '@/components/orders/AddBusinessModal';
 import BusinessDetailModal from '@/components/orders/BusinessDetailModal';
+import RenewBusinessModal from '@/components/orders/RenewBusinessModal';
 
 export default function MyBusinessesPage() {
   const [list, setList]       = useState([]);
@@ -14,7 +15,12 @@ export default function MyBusinessesPage() {
   const [loading, setLoading] = useState(true);
   const [modal, setModal]     = useState(null);   // null | 'new' | order
   const [viewBizId, setViewBizId] = useState(null);
+  const [renewBiz, setRenewBiz] = useState(null);   // business object or null
   const isSuperAdmin = getUser()?.role === 'SUPER_ADMIN';
+
+  const openRenewalBizIds = new Set(
+    orders.filter((o) => o.businessId && ['PENDING_PAYMENT', 'PROOF_SUBMITTED'].includes(o.status)).map((o) => o.businessId)
+  );
 
   const load = useCallback(async () => {
     try {
@@ -51,7 +57,7 @@ export default function MyBusinessesPage() {
               <table className="w-full text-sm">
                 <thead><tr className="text-left text-xs text-gray-500 uppercase">
                   <th className="py-2">Name</th><th className="py-2">Type</th><th className="py-2">Code</th><th className="py-2">Paid until</th>
-                  {isSuperAdmin && <th className="py-2">Actions</th>}
+                  <th className="py-2">Actions</th>
                 </tr></thead>
                 <tbody className="divide-y dark:divide-gray-700">
                   {list.map((b) => (
@@ -60,13 +66,16 @@ export default function MyBusinessesPage() {
                       <td className="py-2.5">{b.industry || '—'}</td>
                       <td className="py-2.5 font-mono text-xs">{b.code}</td>
                       <td className="py-2.5">{b.paidUntil ? formatDate(b.paidUntil) : '—'}</td>
-                      {isSuperAdmin && (
-                        <td className="py-2.5 text-right">
-                          <button className="btn-secondary flex items-center gap-1 ml-auto" onClick={() => setViewBizId(b.id)}>
+                      <td className="py-2.5 text-right whitespace-nowrap">
+                        {b.paidUntil && !openRenewalBizIds.has(b.id) && (
+                          <button className="btn-secondary mr-2" onClick={() => setRenewBiz(b)}>Renew</button>
+                        )}
+                        {isSuperAdmin && (
+                          <button className="btn-secondary inline-flex items-center gap-1" onClick={() => setViewBizId(b.id)}>
                             <Eye className="w-3.5 h-3.5" /> View
                           </button>
-                        </td>
-                      )}
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -125,6 +134,9 @@ export default function MyBusinessesPage() {
       )}
       {viewBizId && (
         <BusinessDetailModal businessId={viewBizId} onClose={() => setViewBizId(null)} />
+      )}
+      {renewBiz && (
+        <RenewBusinessModal business={renewBiz} onClose={() => setRenewBiz(null)} onDone={load} />
       )}
     </div>
   );
