@@ -81,24 +81,25 @@ export default function BusinessDetailModal({ businessId, onClose }) {
             <section>
               <h4 className="font-semibold mb-2 text-sm">Order &amp; payment history</h4>
               {ordersList.length === 0 ? <p className="text-sm text-gray-500">No orders yet.</p> : (
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead><tr className="text-left text-xs text-gray-500 uppercase">
-                    <th className="py-2">Order</th><th className="py-2">Period</th>
-                    <th className="py-2 text-right">Amount</th><th className="py-2">Reference</th>
-                    <th className="py-2">Status</th><th className="py-2">Ordered</th><th className="py-2">Approved</th><th className="py-2" />
+                    <th className="py-2 pr-3">Order</th><th className="py-2 pr-3">Period</th>
+                    <th className="py-2 pr-3 text-right">Amount</th><th className="py-2 pr-3">Reference</th>
+                    <th className="py-2 pr-3">Status</th><th className="py-2 pr-3">Ordered</th><th className="py-2 pr-3">Approved</th><th className="py-2" />
                   </tr></thead>
                   <tbody className="divide-y dark:divide-gray-700">
                     {ordersList.map((o) => {
                       const s = STATUS[o.status] || STATUS.CANCELLED;
                       return (
                         <tr key={o.id}>
-                          <td className="py-2.5 font-mono text-xs">{o.orderNo}</td>
-                          <td className="py-2.5">{o.period === 'YEARLY' ? 'Yearly' : 'Monthly'}</td>
-                          <td className="py-2.5 text-right tabular-nums">{formatCurrency(o.amount)}</td>
-                          <td className="py-2.5">{o.referenceNo || '—'}</td>
-                          <td className="py-2.5"><span className={`badge ${s.cls}`}>{s.label}</span></td>
-                          <td className="py-2.5">{formatDate(o.createdAt)}</td>
-                          <td className="py-2.5">{o.reviewedAt ? formatDate(o.reviewedAt) : '—'}</td>
+                          <td className="py-2.5 pr-3 font-mono text-xs whitespace-nowrap">{o.orderNo}</td>
+                          <td className="py-2.5 pr-3 whitespace-nowrap">{o.period === 'YEARLY' ? 'Yearly' : 'Monthly'}</td>
+                          <td className="py-2.5 pr-3 text-right tabular-nums whitespace-nowrap">{formatCurrency(o.amount)}</td>
+                          <td className="py-2.5 pr-3">{o.referenceNo || '—'}</td>
+                          <td className="py-2.5 pr-3 whitespace-nowrap"><span className={`badge ${s.cls}`}>{s.label}</span></td>
+                          <td className="py-2.5 pr-3 whitespace-nowrap">{formatDate(o.createdAt)}</td>
+                          <td className="py-2.5 pr-3 whitespace-nowrap">{o.reviewedAt ? formatDate(o.reviewedAt) : '—'}</td>
                           <td className="py-2.5 text-right whitespace-nowrap">
                             {o.proofFileName && <button className="btn-secondary" onClick={() => viewProof(o)}>View proof</button>}
                           </td>
@@ -107,6 +108,7 @@ export default function BusinessDetailModal({ businessId, onClose }) {
                     })}
                   </tbody>
                 </table>
+                </div>
               )}
             </section>
           </div>
