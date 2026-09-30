@@ -145,16 +145,27 @@ exports.approve = async (req, res, next) => {
     });
     if (!claimed.count) throw createError('This order is not awaiting approval', 409);
 
-    let order, biz;
+    let order, biz, newPaidUntil;
     try {
       order = await prisma.businessOrder.findUnique({ where: { id }, include: { user: true } });
-      biz = await createProvisionedBusiness({
-        name: order.companyName, tin: order.tin, address: order.address, phone: order.phone,
-        email: order.user.email,
-        companyType: order.companyType, taxType: order.taxType, booksStartDate: order.booksStartDate,
-        ownerUserId: order.userId,
-        paidUntil: computePaidUntil(new Date(), order.period),
-      });
+
+      if (order.businessId) {
+        // Renewal — the business already exists; extend it instead of
+        // provisioning a new one. Stack on top of a still-active paidUntil;
+        // start fresh from today if it already lapsed.
+        biz = await prisma.business.findUnique({ where: { id: order.businessId } });
+        const from = biz.paidUntil && biz.paidUntil > new Date() ? biz.paidUntil : new Date();
+        newPaidUntil = computePaidUntil(from, order.period);
+        await prisma.business.update({ where: { id: order.businessId }, data: { paidUntil: newPaidUntil } });
+      } else {
+        biz = await createProvisionedBusiness({
+          name: order.companyName, tin: order.tin, address: order.address, phone: order.phone,
+          email: order.user.email,
+          companyType: order.companyType, taxType: order.taxType, booksStartDate: order.booksStartDate,
+          ownerUserId: order.userId,
+          paidUntil: computePaidUntil(new Date(), order.period),
+        });
+      }
     } catch (err) {
       try {
         await prisma.businessOrder.updateMany({
@@ -165,6 +176,11 @@ exports.approve = async (req, res, next) => {
         logger.error(`Failed to revert claim on business order ${id}: ${revertErr.message}`);
       }
       throw err;
+    }
+
+    if (order.businessId) {
+      await recordAudit({ req, action: 'APPROVE', entity: 'BusinessOrder', entityId: id, businessId: order.businessId, summary: `Approved ${order.orderNo}; extended "${biz.name}" to ${newPaidUntil.toISOString().slice(0, 10)}` });
+      return res.json({ message: `Approved — extended to ${newPaidUntil.toISOString().slice(0, 10)}`, businessId: order.businessId });
     }
 
     try {

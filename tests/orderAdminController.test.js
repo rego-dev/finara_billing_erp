@@ -3,7 +3,7 @@ jest.mock('../server/config/database', () => ({
   planPrice:          { findMany: jest.fn(), upsert: jest.fn() },
   paymentInstruction: { findUnique: jest.fn(), upsert: jest.fn() },
   businessOrder:      { findMany: jest.fn(), findUnique: jest.fn(), update: jest.fn(), updateMany: jest.fn() },
-  business:           { findUnique: jest.fn() },
+  business:           { findUnique: jest.fn(), update: jest.fn() },
 }));
 jest.mock('../server/utils/audit', () => ({ recordAudit: jest.fn() }));
 jest.mock('../server/utils/orderUploads', () => ({ removeStoredFile: jest.fn() }));
@@ -86,6 +86,53 @@ describe('approve', () => {
       .mockRejectedValueOnce(new Error('revert failed'));
     await expect(call(ctrl.approve, { params: { id: '9' } })).rejects.toThrow('boom');
     expect(logger.error).toHaveBeenCalled();
+  });
+});
+
+describe('approve (renewal orders)', () => {
+  const renewalOrder = {
+    id: 9, orderNo: 'ORD-BBBBBB', userId: 7, businessId: 3, period: 'MONTHLY',
+    user: { id: 7, email: 'u@example.com' },
+  };
+
+  test('extends paidUntil from the business\'s current value when still in the future', async () => {
+    prisma.businessOrder.findUnique.mockResolvedValue(renewalOrder);
+    const future = new Date(Date.now() + 10 * 864e5); // 10 days out
+    prisma.business.findUnique.mockResolvedValue({ id: 3, name: 'Acme', paidUntil: future });
+
+    const out = await call(ctrl.approve, { params: { id: '9' } });
+
+    expect(prisma.business.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 3 } }));
+    const newPaidUntil = prisma.business.update.mock.calls[0][0].data.paidUntil;
+    expect(newPaidUntil.getTime()).toBeGreaterThan(future.getTime());
+    expect(createProvisionedBusiness).not.toHaveBeenCalled();
+    expect(prisma.businessOrder.update).not.toHaveBeenCalled(); // no businessId link needed, it's already set
+    expect(out).toMatchObject({ businessId: 3 });
+    expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: 'APPROVE', businessId: 3 }));
+  });
+
+  test('extends from today when paidUntil already lapsed', async () => {
+    prisma.businessOrder.findUnique.mockResolvedValue(renewalOrder);
+    const past = new Date(Date.now() - 10 * 864e5);
+    prisma.business.findUnique.mockResolvedValue({ id: 3, name: 'Acme', paidUntil: past });
+
+    await call(ctrl.approve, { params: { id: '9' } });
+
+    const newPaidUntil = prisma.business.update.mock.calls[0][0].data.paidUntil;
+    // ~1 month out from TODAY, not from the lapsed date — i.e. well past "10 days ago + 1 month"
+    expect(newPaidUntil.getTime()).toBeGreaterThan(Date.now() + 25 * 864e5);
+  });
+
+  test('if extending paidUntil fails, the claim is reverted and the error surfaces', async () => {
+    prisma.businessOrder.findUnique.mockResolvedValue(renewalOrder);
+    prisma.business.findUnique.mockResolvedValue({ id: 3, name: 'Acme', paidUntil: null });
+    prisma.business.update.mockRejectedValue(new Error('db down'));
+
+    await expect(call(ctrl.approve, { params: { id: '9' } })).rejects.toThrow('db down');
+    expect(prisma.businessOrder.updateMany).toHaveBeenLastCalledWith({
+      where: { id: 9 },
+      data: { status: 'PROOF_SUBMITTED', reviewedById: null, reviewedAt: null },
+    });
   });
 });
 
