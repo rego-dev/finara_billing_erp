@@ -5,6 +5,7 @@
 // docs/superpowers/specs/2026-09-30-subscription-gl-posting-design.md.
 const prisma = require('../config/database');
 const glPost = require('./glPost');
+const logger = require('./logger');
 
 const FINARA_OPS_CODE = 'FINARA-OPS';
 const CASH_ACCOUNT_CODE = '1010';
@@ -22,21 +23,30 @@ async function getFinaraOpsBusinessId() {
   return _finaraOpsBusinessId;
 }
 
-// kind: 'NEW' | 'RENEWAL'
+// kind: 'NEW' | 'RENEWAL'. Never throws — mirrors glPost.safePost's own
+// contract (log + return null on failure) so a missing/unconfigured
+// Finara Operations business (e.g. this migration not yet applied) can
+// never crash an order approval, the same way a GL hiccup never blocks any
+// other module in this codebase.
 async function postSubscriptionPayment({ order, companyName, kind, userId }) {
-  const businessId = await getFinaraOpsBusinessId();
-  const label = kind === 'RENEWAL' ? 'Renewal' : 'New';
-  return glPost.safePost({
-    entryDate: new Date(),
-    description: `Subscription — ${label}: ${companyName} (${order.orderNo})`,
-    reference: order.orderNo,
-    lines: [
-      { accountCode: CASH_ACCOUNT_CODE, debit: Number(order.amount), description: `Payment received — ${order.orderNo}` },
-      { accountCode: REVENUE_ACCOUNT_CODE, credit: Number(order.amount), description: `Subscription revenue — ${companyName}` },
-    ],
-    userId,
-    businessId,
-  });
+  try {
+    const businessId = await getFinaraOpsBusinessId();
+    const label = kind === 'RENEWAL' ? 'Renewal' : 'New';
+    return await glPost.safePost({
+      entryDate: new Date(),
+      description: `Subscription — ${label}: ${companyName} (${order.orderNo})`,
+      reference: order.orderNo,
+      lines: [
+        { accountCode: CASH_ACCOUNT_CODE, debit: Number(order.amount), description: `Payment received — ${order.orderNo}` },
+        { accountCode: REVENUE_ACCOUNT_CODE, credit: Number(order.amount), description: `Subscription revenue — ${companyName}` },
+      ],
+      userId,
+      businessId,
+    });
+  } catch (err) {
+    logger.error(`[SUBSCRIPTION GL] Failed to post ${kind} entry for ${order.orderNo}: ${err.message}`);
+    return null;
+  }
 }
 
 module.exports = { postSubscriptionPayment, getFinaraOpsBusinessId, FINARA_OPS_CODE };
