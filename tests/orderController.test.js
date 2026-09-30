@@ -155,16 +155,56 @@ describe('orderController.submitProof', () => {
 });
 
 describe('orderController.cancel', () => {
-  test('only cancels the caller\'s open orders', async () => {
+  test('the caller can cancel their own open new-business order', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ id: 5, userId: 7, businessId: null, status: 'PENDING_PAYMENT' });
     prisma.businessOrder.updateMany.mockResolvedValue({ count: 1 });
     await call(ctrl.cancel, { params: { id: '5' } });
     expect(prisma.businessOrder.updateMany).toHaveBeenCalledWith({
-      where: { id: 5, userId: 7, status: { in: ['PENDING_PAYMENT', 'PROOF_SUBMITTED'] } },
+      where: { id: 5, status: { in: ['PENDING_PAYMENT', 'PROOF_SUBMITTED'] } },
       data: { status: 'CANCELLED' },
     });
   });
 
-  test('409s when nothing was cancellable', async () => {
+  test('a different user cannot cancel someone else\'s new-business order', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ id: 5, userId: 99, businessId: null, status: 'PENDING_PAYMENT' });
+    await expect(call(ctrl.cancel, { params: { id: '5' } })).rejects.toMatchObject({ statusCode: 409 });
+    expect(prisma.businessOrder.updateMany).not.toHaveBeenCalled();
+  });
+
+  test('any user with access to the business can cancel its open renewal order, not just whoever placed it', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ id: 5, userId: 99, businessId: 3, status: 'PENDING_PAYMENT' });
+    prisma.userBusiness.findUnique.mockResolvedValue({ userId: 7, businessId: 3 });
+    prisma.businessOrder.updateMany.mockResolvedValue({ count: 1 });
+    await call(ctrl.cancel, { params: { id: '5' } });
+    expect(prisma.businessOrder.updateMany).toHaveBeenCalledWith({
+      where: { id: 5, status: { in: ['PENDING_PAYMENT', 'PROOF_SUBMITTED'] } },
+      data: { status: 'CANCELLED' },
+    });
+  });
+
+  test('a user with no access to the renewed business cannot cancel it', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ id: 5, userId: 99, businessId: 3, status: 'PENDING_PAYMENT' });
+    prisma.userBusiness.findUnique.mockResolvedValue(null);
+    await expect(call(ctrl.cancel, { params: { id: '5' } })).rejects.toMatchObject({ statusCode: 403 });
+    expect(prisma.businessOrder.updateMany).not.toHaveBeenCalled();
+  });
+
+  test('ADMIN can cancel any renewal order regardless of grant', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ id: 5, userId: 99, businessId: 3, status: 'PROOF_SUBMITTED' });
+    prisma.businessOrder.updateMany.mockResolvedValue({ count: 1 });
+    await call(ctrl.cancel, { user: { id: 1, role: 'ADMIN' }, params: { id: '5' } });
+    expect(prisma.userBusiness.findUnique).not.toHaveBeenCalled();
+    expect(prisma.businessOrder.updateMany).toHaveBeenCalled();
+  });
+
+  test('409s when the order does not exist or is already closed', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue(null);
+    await expect(call(ctrl.cancel, { params: { id: '5' } })).rejects.toMatchObject({ statusCode: 409 });
+    expect(prisma.businessOrder.updateMany).not.toHaveBeenCalled();
+  });
+
+  test('409s when a concurrent change already closed it (lost race on the final updateMany)', async () => {
+    prisma.businessOrder.findFirst.mockResolvedValue({ id: 5, userId: 7, businessId: null, status: 'PENDING_PAYMENT' });
     prisma.businessOrder.updateMany.mockResolvedValue({ count: 0 });
     await expect(call(ctrl.cancel, { params: { id: '5' } })).rejects.toMatchObject({ statusCode: 409 });
   });

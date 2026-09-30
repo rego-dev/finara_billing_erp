@@ -106,8 +106,22 @@ exports.submitProof = async (req, res, next) => {
 exports.cancel = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    const order = await prisma.businessOrder.findFirst({ where: { id, status: { in: OPEN } } });
+    if (!order) throw createError('Order not found or can no longer be cancelled', 409);
+
+    if (order.businessId) {
+      // Renewal order: anyone with access to the business it's renewing can
+      // cancel it, not just whoever happened to place it — otherwise an
+      // abandoned "Pay later" order permanently blocks that business's
+      // renewal for everyone else (the one-open-renewal-per-business rule
+      // has no other way to clear it).
+      await assertBusinessAccess(req.user, order.businessId);
+    } else if (order.userId !== req.user.id) {
+      throw createError('Order not found or can no longer be cancelled', 409);
+    }
+
     const { count } = await prisma.businessOrder.updateMany({
-      where: { id, userId: req.user.id, status: { in: OPEN } },
+      where: { id, status: { in: OPEN } },
       data: { status: 'CANCELLED' },
     });
     if (!count) throw createError('Order not found or can no longer be cancelled', 409);
@@ -173,7 +187,7 @@ exports.renew = async (req, res, next) => {
       orderBy: { createdAt: 'desc' },
     });
     if (!last) throw createError('This business has no order on record; it cannot be renewed here', 409);
-    if (OPEN.includes(last.status)) throw createError('This business already has a renewal payment awaiting review', 409);
+    if (OPEN.includes(last.status)) throw createError('This business already has a renewal order in progress', 409);
 
     const price = await prisma.planPrice.findUnique({
       where: { companyType_period: { companyType: last.companyType, period } },

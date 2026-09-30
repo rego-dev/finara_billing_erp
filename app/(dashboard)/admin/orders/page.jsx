@@ -38,7 +38,10 @@ export default function OrdersAdminPage() {
   };
 
   const approve = async (o) => {
-    if (!window.confirm(`Approve ${o.orderNo} and create "${o.companyName}"?`)) return;
+    const msg = o.businessId
+      ? `Approve ${o.orderNo} and extend "${o.companyName}"'s subscription?`
+      : `Approve ${o.orderNo} and create "${o.companyName}"?`;
+    if (!window.confirm(msg)) return;
     setBusyId(o.id);
     try { const { data } = await ordersApi.admin.approve(o.id); toast.success(data.message); load(); }
     catch (err) { toast.error(err.response?.data?.error || 'Approval failed'); }
@@ -59,7 +62,7 @@ export default function OrdersAdminPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Business Orders</h1>
-          <p className="page-subtitle">Review payments; approving creates the customer&apos;s business</p>
+          <p className="page-subtitle">Review payments; approving a new order creates the business, approving a renewal extends it</p>
         </div>
       </div>
 
@@ -82,7 +85,11 @@ export default function OrdersAdminPage() {
               <tr key={o.id}>
                 <td className="py-2.5 font-mono text-xs">{o.orderNo}</td>
                 <td className="py-2.5">{o.user.firstName} {o.user.lastName}<div className="text-xs text-gray-500">{o.user.email}</div></td>
-                <td className="py-2.5">{o.companyName}<div className="text-xs text-gray-500">{o.companyType} · {o.taxType}</div></td>
+                <td className="py-2.5">
+                  {o.companyName}
+                  {o.businessId && <span className="badge badge-blue ml-2 text-[10px]">Renewal</span>}
+                  <div className="text-xs text-gray-500">{o.companyType} · {o.taxType}</div>
+                </td>
                 <td className="py-2.5">{o.period === 'YEARLY' ? 'Yearly' : 'Monthly'}</td>
                 <td className="py-2.5 text-right tabular-nums">{formatCurrency(o.amount)}</td>
                 <td className="py-2.5">{o.referenceNo || '—'}</td>
