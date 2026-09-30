@@ -1,17 +1,20 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Building2, Loader2 } from 'lucide-react';
+import { Plus, Building2, Loader2, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { businesses as bizApi, orders as ordersApi } from '@/lib/api';
-import { formatCurrency, formatDate } from '@/lib/auth';
+import { formatCurrency, formatDate, getUser } from '@/lib/auth';
 import { STATUS } from '@/lib/orderStatus';
 import AddBusinessModal from '@/components/orders/AddBusinessModal';
+import BusinessDetailModal from '@/components/orders/BusinessDetailModal';
 
 export default function MyBusinessesPage() {
   const [list, setList]       = useState([]);
   const [orders, setOrders]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal]     = useState(null);   // null | 'new' | order
+  const [viewBizId, setViewBizId] = useState(null);
+  const isSuperAdmin = getUser()?.role === 'SUPER_ADMIN';
 
   const load = useCallback(async () => {
     try {
@@ -48,6 +51,7 @@ export default function MyBusinessesPage() {
               <table className="w-full text-sm">
                 <thead><tr className="text-left text-xs text-gray-500 uppercase">
                   <th className="py-2">Name</th><th className="py-2">Type</th><th className="py-2">Code</th><th className="py-2">Paid until</th>
+                  {isSuperAdmin && <th className="py-2" />}
                 </tr></thead>
                 <tbody className="divide-y dark:divide-gray-700">
                   {list.map((b) => (
@@ -56,6 +60,13 @@ export default function MyBusinessesPage() {
                       <td className="py-2.5">{b.industry || '—'}</td>
                       <td className="py-2.5 font-mono text-xs">{b.code}</td>
                       <td className="py-2.5">{b.paidUntil ? formatDate(b.paidUntil) : '—'}</td>
+                      {isSuperAdmin && (
+                        <td className="py-2.5 text-right">
+                          <button className="btn-secondary flex items-center gap-1 ml-auto" onClick={() => setViewBizId(b.id)}>
+                            <Eye className="w-3.5 h-3.5" /> View
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -111,6 +122,9 @@ export default function MyBusinessesPage() {
           onClose={() => setModal(null)}
           onDone={load}
         />
+      )}
+      {viewBizId && (
+        <BusinessDetailModal businessId={viewBizId} onClose={() => setViewBizId(null)} />
       )}
     </div>
   );
