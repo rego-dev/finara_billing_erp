@@ -4,15 +4,8 @@ import { Plus, Building2, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { businesses as bizApi, orders as ordersApi } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/auth';
+import { STATUS } from '@/lib/orderStatus';
 import AddBusinessModal from '@/components/orders/AddBusinessModal';
-
-const STATUS = {
-  PENDING_PAYMENT: { label: 'Awaiting payment', cls: 'badge-yellow' },
-  PROOF_SUBMITTED: { label: 'Under review',     cls: 'badge-blue' },
-  APPROVED:        { label: 'Approved',         cls: 'badge-green' },
-  REJECTED:        { label: 'Rejected',         cls: 'badge-red' },
-  CANCELLED:       { label: 'Cancelled',        cls: 'badge' },
-};
 
 export default function MyBusinessesPage() {
   const [list, setList]       = useState([]);
