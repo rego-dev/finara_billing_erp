@@ -52,17 +52,24 @@ describe('postSubscriptionPayment', () => {
     }));
   });
 
-  test('does not throw when the Finara Operations business cannot be found — logs and returns null instead, like safePost', async () => {
+  test('does not throw when the Finara Operations business cannot be found — logs, records a GL_POST_FAILED audit entry, and returns null instead, like safePost', async () => {
     jest.resetModules();
     jest.doMock('../server/config/database', () => ({ business: { findFirst: jest.fn().mockResolvedValue(null) } }));
     jest.doMock('../server/utils/glPost', () => ({ safePost: jest.fn() }));
     jest.doMock('../server/utils/logger', () => ({ error: jest.fn() }));
+    jest.doMock('../server/utils/audit', () => ({ recordAudit: jest.fn() }));
     const freshLogger = require('../server/utils/logger');
+    const freshAudit = require('../server/utils/audit');
     const { postSubscriptionPayment: freshPost } = require('../server/utils/subscriptionGL');
 
     const result = await freshPost({ order, companyName: 'Acme', kind: 'NEW', userId: 1 });
 
     expect(result).toBeNull();
     expect(freshLogger.error).toHaveBeenCalledWith(expect.stringContaining('ORD-AAAAAA'));
+    expect(freshAudit.recordAudit).toHaveBeenCalledWith(expect.objectContaining({
+      action: 'GL_POST_FAILED',
+      entity: 'JournalEntry',
+      entityId: 'ORD-AAAAAA',
+    }));
   });
 });

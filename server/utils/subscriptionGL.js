@@ -6,6 +6,7 @@
 const prisma = require('../config/database');
 const glPost = require('./glPost');
 const logger = require('./logger');
+const { recordAudit } = require('./audit');
 
 const FINARA_OPS_CODE = 'FINARA-OPS';
 const CASH_ACCOUNT_CODE = '1010';
@@ -45,6 +46,17 @@ async function postSubscriptionPayment({ order, companyName, kind, userId }) {
     });
   } catch (err) {
     logger.error(`[SUBSCRIPTION GL] Failed to post ${kind} entry for ${order.orderNo}: ${err.message}`);
+    // recordAudit already swallows its own errors internally (never throws),
+    // so no extra try/catch is needed here — unlike glPost.js's safePost,
+    // which wraps its own recordAudit call defensively for the same reason
+    // but redundantly, since recordAudit's own guarantee already covers it.
+    await recordAudit({
+      action: 'GL_POST_FAILED',
+      entity: 'JournalEntry',
+      entityId: order.orderNo,
+      summary: `Subscription GL auto-post FAILED for ${order.orderNo} — ${err.message}`,
+      user: userId ? { id: userId } : undefined,
+    });
     return null;
   }
 }
